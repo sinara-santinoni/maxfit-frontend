@@ -166,24 +166,50 @@ export const desafioService = {
     (await api.delete(`/desafios/${desafioId}`)).data,
 };
 
-// ========== COMUNIDADE ==========
+// ========== COMUNIDADE (ATUALIZADO COM COMENTÁRIOS E CURTIDAS) ==========
 export const comunidadeService = {
+  // Listar postagens
   listarPostagens: async () => {
-    const resp = await api.get('/comunidade');
-    // backend retorna List<PostagemResponse>
+    const user = JSON.parse(localStorage.getItem('user'));
+    const resp = await api.get('/comunidade', {
+      params: { usuarioId: user?.id }
+    });
     return resp.data;
   },
-
+  
+  // Criar postagem
   criarPostagem: async (texto) => {
     const user = JSON.parse(localStorage.getItem('user'));
-
     const resp = await api.post('/comunidade', {
       usuarioId: user?.id,
       texto,
     });
-
-    // backend retorna ApiResponse<PostagemResponse>
     return resp.data.data;
+  },
+  
+  // 🆕 Curtir/Descurtir postagem
+  curtir: async (postagemId) => {
+    const user = JSON.parse(localStorage.getItem('user'));
+    const resp = await api.post(`/comunidade/${postagemId}/curtir`, null, {
+      params: { usuarioId: user?.id }
+    });
+    return resp.data.data; // retorna true se curtiu, false se descurtiu
+  },
+  
+  // 🆕 Comentar em postagem
+  comentar: async (postagemId, texto) => {
+    const user = JSON.parse(localStorage.getItem('user'));
+    const resp = await api.post(`/comunidade/${postagemId}/comentarios`, {
+      usuarioId: user?.id,
+      texto,
+    });
+    return resp.data.data;
+  },
+  
+  // 🆕 Listar comentários de uma postagem
+  listarComentarios: async (postagemId) => {
+    const resp = await api.get(`/comunidade/${postagemId}/comentarios`);
+    return resp.data;
   },
 };
 
