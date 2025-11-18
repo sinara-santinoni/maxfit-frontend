@@ -45,7 +45,6 @@ export const authService = {
     const response = await api.post('/login', { email, senha });
     
     // Seu backend retorna: { id, nome, email, tipo, token }
-    // Vamos adaptar para o formato esperado pelo front
     const data = response.data;
     
     return {
@@ -89,7 +88,7 @@ export const authService = {
 // ========== TREINOS ==========
 
 export const treinoService = {
-  // ✅ LISTAR TREINOS DO ALUNO - Usando query parameter
+  // ✅ LISTAR TREINOS DO ALUNO - Usando path param
   listarTreinosAluno: async (alunoId) => {
     // Se não passar alunoId, pega do localStorage
     if (!alunoId) {
@@ -119,24 +118,36 @@ export const treinoService = {
 export const diarioService = {
   // ✅ CRIAR REGISTRO - Endpoint: /diarios
   criarRegistro: async (dados) => {
-    // Adiciona o alunoId do usuário logado
     const user = JSON.parse(localStorage.getItem('user'));
+
+    if (!user?.id) {
+      throw new Error('Usuário não encontrado no localStorage');
+    }
+
     const payload = {
       ...dados,
-      alunoId: user?.id
+      alunoId: user.id, // obrigatório para o backend
     };
-    
+
     const response = await api.post('/diarios', payload);
-    return response.data;
+    // Backend retorna ApiResponse<DiarioResponse>
+    return response.data.data;
   },
 
-  // ✅ LISTAR REGISTROS - Endpoint: /diarios/{alunoId}
+  // ✅ LISTAR REGISTROS - Endpoint: /diarios?alunoId=...
   listarRegistros: async () => {
     const user = JSON.parse(localStorage.getItem('user'));
-    const alunoId = user?.id;
-    
-    const response = await api.get(`/diarios/${alunoId}`);
-    return response.data;
+
+    if (!user?.id) {
+      throw new Error('Usuário não encontrado no localStorage');
+    }
+
+    const response = await api.get('/diarios', {
+      params: { alunoId: user.id },
+    });
+
+    // Backend retorna ApiResponse<List<DiarioResponse>>
+    return response.data.data || [];
   },
 };
 
