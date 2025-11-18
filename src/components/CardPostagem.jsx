@@ -15,21 +15,44 @@ const CardPostagem = ({ postagem, onComentar }) => {
     }
   };
 
+  // ========= NOME DO AUTOR DA POSTAGEM =========
+  const nomeAutor =
+    postagem.usuarioNome ||              // vem do backend já pronto
+    postagem.usuario?.nome ||            // fallback se vier aninhado
+    'Usuário';
+
+  const inicialAutor = nomeAutor.charAt(0).toUpperCase();
+
+  // ========= DATA DA POSTAGEM =========
+  let dataFormatada = 'Sem data';
+  let horaFormatada = '';
+
+  if (postagem.dataCriacao || postagem.dataHora) {
+    const raw =
+      postagem.dataCriacao || postagem.dataHora; // usa o que existir
+    const dt = new Date(raw.includes('T') ? raw : raw.replace(' ', 'T'));
+
+    if (!isNaN(dt.getTime())) {
+      dataFormatada = dt.toLocaleDateString('pt-BR');
+      horaFormatada = dt.toLocaleTimeString('pt-BR', {
+        hour: '2-digit',
+        minute: '2-digit',
+      });
+    }
+  }
+
   return (
     <div className="card">
       {/* Cabeçalho da postagem */}
       <div className="flex items-center mb-3">
         <div className="w-10 h-10 bg-primary rounded-full flex items-center justify-center text-white font-bold">
-          {postagem.usuario?.nome?.charAt(0) || 'U'}
+          {inicialAutor}
         </div>
         <div className="ml-3">
-          <p className="font-semibold text-dark">{postagem.usuario?.nome}</p>
+          <p className="font-semibold text-dark">{nomeAutor}</p>
           <p className="text-xs text-gray-500">
-            {new Date(postagem.dataHora).toLocaleDateString('pt-BR')} às{' '}
-            {new Date(postagem.dataHora).toLocaleTimeString('pt-BR', { 
-              hour: '2-digit', 
-              minute: '2-digit' 
-            })}
+            {dataFormatada}
+            {horaFormatada && <> às {horaFormatada}</>}
           </p>
         </div>
       </div>
@@ -39,7 +62,7 @@ const CardPostagem = ({ postagem, onComentar }) => {
 
       {/* Botões de ação */}
       <div className="flex items-center gap-4 pb-3 border-b border-gray-200">
-        <button 
+        <button
           onClick={() => setMostrarComentarios(!mostrarComentarios)}
           className="text-sm text-gray-600 hover:text-primary flex items-center gap-1"
         >
@@ -51,14 +74,21 @@ const CardPostagem = ({ postagem, onComentar }) => {
       {mostrarComentarios && (
         <div className="mt-4">
           {/* Lista de comentários */}
-          {postagem.comentarios?.map((comentario) => (
-            <div key={comentario.id} className="bg-gray-50 p-3 rounded-lg mb-2">
-              <p className="text-sm font-semibold text-dark mb-1">
-                {comentario.usuario?.nome}
-              </p>
-              <p className="text-sm text-gray-700">{comentario.texto}</p>
-            </div>
-          ))}
+          {postagem.comentarios?.map((comentario) => {
+            const nomeComentario =
+              comentario.usuarioNome ||
+              comentario.usuario?.nome ||
+              'Usuário';
+
+            return (
+              <div key={comentario.id} className="bg-gray-50 p-3 rounded-lg mb-2">
+                <p className="text-sm font-semibold text-dark mb-1">
+                  {nomeComentario}
+                </p>
+                <p className="text-sm text-gray-700">{comentario.texto}</p>
+              </div>
+            );
+          })}
 
           {/* Formulário para adicionar comentário */}
           <div className="flex gap-2 mt-3">
