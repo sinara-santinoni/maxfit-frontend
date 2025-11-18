@@ -1,116 +1,133 @@
 import Header from "../components/Header";
 import BottomNav from "../components/BottomNav";
+import { useAuth } from "../context/AuthContext";
+import { useEffect, useState } from "react";
+import axios from "axios";
+
+const API_URL = import.meta.env.VITE_API_URL; // sua API do Render
 
 const MeuProgresso = () => {
-  // DADOS MOCKADOS (depois você troca pelos dados da API)
-  const progressoMensal = 60; // %
-  const totalTreinos = 12;
-  const treinosRealizados = 7;
+  const { user } = useAuth();
+  const [loading, setLoading] = useState(true);
+  const [progresso, setProgresso] = useState(null);
 
-  const pesoAtual = 72.4;
-  const pesoInicial = 76.0;
+  // ========================
+  // 1. Buscar progresso no backend
+  // ========================
+  const carregarProgresso = async () => {
+    try {
+      const response = await axios.get(`${API_URL}/api/progresso/${user.id}`);
+      const lista = response.data.data; // vem dentro do ApiResponse
 
-  const medidas = {
-    peito: 98,
-    cintura: 76,
-    quadril: 102,
-    braco: 29,
+      if (lista.length > 0) {
+        setProgresso(lista[0]); // mais recente primeiro
+      } else {
+        setProgresso(null);
+      }
+    } catch (err) {
+      console.error("Erro ao buscar progresso:", err);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const humorSemana = ["😀", "😀", "🙂", "😐", "😐", "😞", "😀"];
+  useEffect(() => {
+    carregarProgresso();
+  }, []);
 
-  const conquistas = [
-    "🏅 1 semana sem faltar",
-    "🔥 3 treinos seguidos",
-    "💧 Hidratação em dia",
-  ];
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin h-12 w-12 border-b-2 border-primary rounded-full"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 pb-24">
       <Header title="Meu Progresso" />
 
       <main className="pt-20 px-4 max-w-md mx-auto space-y-5">
-
-        {/* Card Progresso Mensal */}
-        <div className="card">
-          <h2 className="text-lg font-bold mb-2 text-dark">Progresso Mensal</h2>
-
-          <p className="text-sm text-gray-600 mb-2">
-            Meta de {totalTreinos} treinos — você completou {treinosRealizados}
-          </p>
-
-          <div className="w-full bg-gray-200 h-3 rounded-full overflow-hidden">
-            <div
-              className="bg-primary h-3 rounded-full"
-              style={{ width: `${progressoMensal}%` }}
-            ></div>
+        {/* Se não tiver progresso ainda */}
+        {!progresso && (
+          <div className="card text-center py-8">
+            <p className="text-4xl mb-3">📉</p>
+            <p className="text-gray-700 font-semibold">
+              Nenhum progresso registrado ainda.
+            </p>
+            <p className="text-sm text-gray-500 mt-1">
+              Registre seu primeiro progresso no Diário ou com seu Personal!
+            </p>
           </div>
+        )}
 
-          <p className="text-sm text-gray-700 mt-2 font-semibold">
-            {progressoMensal}% concluído
-          </p>
-        </div>
+        {/* ============================
+              EXIBIR PROGRESSO REAL
+        ============================ */}
+        {progresso && (
+          <>
+            {/* Peso */}
+            <div className="card">
+              <h2 className="text-lg font-bold mb-1 text-dark">Peso Atual</h2>
+              <p className="text-3xl font-bold text-primary">{progresso.peso} kg</p>
 
-        {/* Card Peso */}
-        <div className="card">
-          <h2 className="text-lg font-bold mb-1 text-dark">Peso</h2>
-          <p className="text-gray-700 text-sm">
-            Peso atual: <strong>{pesoAtual} kg</strong>
-          </p>
-          <p className="text-gray-600 text-sm">
-            Mudança:{" "}
-            <strong className={pesoAtual < pesoInicial ? "text-green-600" : "text-red-600"}>
-              {(pesoAtual - pesoInicial).toFixed(1)} kg
-            </strong>
-          </p>
-        </div>
+              <p className="text-sm text-gray-600 mt-2">
+                Registrado em:{" "}
+                {new Date(progresso.dataRegistro).toLocaleDateString("pt-BR")}
+              </p>
+            </div>
 
-        {/* Card Medidas */}
-        <div className="card">
-          <h2 className="text-lg font-bold mb-2 text-dark">Medidas Corporais</h2>
-          <ul className="text-sm text-gray-700 space-y-1">
-            <li>Peito: {medidas.peito} cm</li>
-            <li>Cintura: {medidas.cintura} cm</li>
-            <li>Quadril: {medidas.quadril} cm</li>
-            <li>Braço: {medidas.braco} cm</li>
-          </ul>
+            {/* IMC */}
+            <div className="card">
+              <h2 className="text-lg font-bold text-dark mb-2">IMC</h2>
 
-          <button className="mt-4 bg-primary text-white px-4 py-2 rounded-lg hover:bg-orange-600 w-full">
-            + Adicionar Medição
-          </button>
-        </div>
+              <p className="text-2xl font-bold text-indigo-600">
+                {progresso.imc?.toFixed(1)}
+              </p>
 
-        {/* Card Humor */}
-        <div className="card">
-          <h2 className="text-lg font-bold mb-2 text-dark">Seu Humor</h2>
-          <p className="text-2xl">
-            {humorSemana.map((emoji, i) => (
-              <span key={i} className="mr-1">{emoji}</span>
-            ))}
-          </p>
-          <p className="text-xs text-gray-500 mt-1">Últimos 7 dias</p>
-        </div>
+              <p className="text-sm text-gray-700 mt-1">
+                {progresso.classificacaoIMC}
+              </p>
+            </div>
 
-        {/* Card Frequência */}
-        <div className="card">
-          <h2 className="text-lg font-bold mb-2 text-dark">Frequência</h2>
-          <p className="text-sm text-gray-700">
-            Treinos realizados esta semana:
-          </p>
-          <p className="text-lg font-bold text-primary">
-            3/4 treinos concluídos
-          </p>
-        </div>
+            {/* Medidas */}
+            <div className="card">
+              <h2 className="text-lg font-bold mb-2 text-dark">Medidas Corporais</h2>
 
-        {/* Card Conquistas */}
-        <div className="card">
-          <h2 className="text-lg font-bold mb-2 text-dark">Conquistas</h2>
-          <ul className="space-y-2">
-            {conquistas.map((c, i) => (
-              <li key={i} className="text-sm text-gray-700">{c}</li>
-            ))}
-          </ul>
-        </div>
+              <ul className="text-sm text-gray-700 space-y-1">
+                <li>Braços: {progresso.circunferenciaBracos} cm</li>
+                <li>Peito: {progresso.circunferenciaPeito} cm</li>
+                <li>Cintura: {progresso.circunferenciaCintura} cm</li>
+                <li>Quadril: {progresso.circunferenciaQuadril} cm</li>
+                <li>Coxas: {progresso.circunferenciaCoxas} cm</li>
+                <li>Panturrilhas: {progresso.circunferenciaPanturrilhas} cm</li>
+              </ul>
+            </div>
+
+            {/* Gordura & Massa */}
+            <div className="card">
+              <h2 className="text-lg font-bold text-dark mb-2">Composição Corporal</h2>
+
+              <p className="text-sm text-gray-700">
+                Percentual de gordura:{" "}
+                <strong>{progresso.percentualGordura}%</strong>
+              </p>
+
+              <p className="text-sm text-gray-700">
+                Massa muscular:{" "}
+                <strong>{progresso.massaMuscular} kg</strong>
+              </p>
+            </div>
+
+            {/* Observações */}
+            {progresso.observacoes && (
+              <div className="card">
+                <h2 className="text-lg font-bold text-dark mb-2">Observações</h2>
+                <p className="text-sm text-gray-700">{progresso.observacoes}</p>
+              </div>
+            )}
+          </>
+        )}
       </main>
 
       <BottomNav />
