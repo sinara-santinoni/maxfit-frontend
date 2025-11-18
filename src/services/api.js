@@ -19,9 +19,7 @@ api.interceptors.request.use(
     }
     return config;
   },
-  (error) => {
-    return Promise.reject(error);
-  }
+  (error) => Promise.reject(error)
 );
 
 // Interceptor para tratar erros
@@ -42,9 +40,8 @@ api.interceptors.response.use(
 export const authService = {
   login: async (email, senha) => {
     const response = await api.post('/login', { email, senha });
-    
     const data = response.data;
-    
+
     return {
       token: data.token,
       usuario: {
@@ -63,7 +60,7 @@ export const authService = {
       senha: dados.senha,
       tipo: 'ALUNO'
     };
-    
+
     const response = await api.post('/cadastro', payload);
     return response.data;
   },
@@ -75,7 +72,7 @@ export const authService = {
       senha: dados.senha,
       tipo: 'PERSONAL'
     };
-    
+
     const response = await api.post('/cadastro', payload);
     return response.data;
   },
@@ -89,7 +86,7 @@ export const treinoService = {
       const user = JSON.parse(localStorage.getItem('user'));
       alunoId = user?.id;
     }
-    
+
     const response = await api.get(`/treinos/${alunoId}`);
     return response.data;
   },
@@ -111,14 +108,9 @@ export const diarioService = {
   criarRegistro: async (dados) => {
     const user = JSON.parse(localStorage.getItem('user'));
 
-    if (!user?.id) {
-      throw new Error('Usuário não encontrado no localStorage');
-    }
+    if (!user?.id) throw new Error('Usuário não encontrado no localStorage');
 
-    const payload = {
-      ...dados,
-      alunoId: user.id,
-    };
+    const payload = { ...dados, alunoId: user.id };
 
     const response = await api.post('/diarios', payload);
     return response.data.data;
@@ -127,9 +119,7 @@ export const diarioService = {
   listarRegistros: async () => {
     const user = JSON.parse(localStorage.getItem('user'));
 
-    if (!user?.id) {
-      throw new Error('Usuário não encontrado no localStorage');
-    }
+    if (!user?.id) throw new Error('Usuário não encontrado no localStorage');
 
     const response = await api.get('/diarios', {
       params: { alunoId: user.id },
@@ -142,35 +132,37 @@ export const diarioService = {
 // ========== DESAFIOS ==========
 
 export const desafioService = {
-  // LISTAR TODOS
+  // LISTAR TODOS OS DESAFIOS
   listarDesafios: async () => {
     const response = await api.get('/desafios');
-    return response.data; // List<DesafioResponse>
-  },
-
-  // PARTICIPAR
-  participar: async (desafioId) => {
-    const user = JSON.parse(localStorage.getItem('user'));
-    const response = await api.post(`/desafios/${desafioId}/participar`, {
-      alunoId: user?.id,
-      progressoAtual: 0
-    });
     return response.data;
   },
 
-  // MEUS DESAFIOS
+  // LISTAR DESAFIOS DO USUÁRIO
   meusDesafios: async () => {
     const user = JSON.parse(localStorage.getItem('user'));
     const response = await api.get(`/desafios/${user?.id}`);
     return response.data;
   },
 
-  // CRIAR DESAFIO (CORRIGIDO)
+  // PARTICIPAR DO DESAFIO
+  participar: async (desafioId) => {
+    const user = JSON.parse(localStorage.getItem('user'));
+
+    const response = await api.post(`/desafios/${desafioId}/participar`, {
+      alunoId: user?.id,
+      progressoAtual: 0,
+    });
+
+    return response.data;
+  },
+
+  // CRIAR DESAFIO
   criarDesafio: async (dados) => {
     const user = JSON.parse(localStorage.getItem('user'));
 
     const payload = {
-      alunoId: user?.id,                     // obrigatório no backend
+      alunoId: user?.id,
       titulo: dados.titulo,
       descricao: dados.descricao,
       meta: dados.meta,
@@ -181,61 +173,62 @@ export const desafioService = {
     const response = await api.post('/desafios', payload);
     return response.data;
   },
+
+  // CONCLUIR DESAFIO
+  concluirDesafio: async (desafioId) => {
+    const response = await api.put(`/desafios/${desafioId}/concluir`);
+    return response.data;
+  },
+
+  // EXCLUIR DESAFIO
+  excluirDesafio: async (desafioId) => {
+    const response = await api.delete(`/desafios/${desafioId}`);
+    return response.data;
+  },
 };
 
-// ========== COMUNIDADE (mock) ==========
+// ========== COMUNIDADE (MOCK) ==========
 
 export const comunidadeService = {
   listarPostagens: async () => {
-    console.warn('Endpoint /postagens não existe no backend');
     return [
       {
         id: 1,
         usuario: { nome: 'Sistema' },
-        texto: 'Bem-vindo ao MaxFit! Em breve teremos a funcionalidade de comunidade.',
+        texto: 'Bem-vindo ao MaxFit! Em breve teremos comunidade.',
         dataHora: new Date().toISOString(),
         comentarios: []
       }
     ];
   },
 
-  criarPostagem: async () => {
-    console.warn('Endpoint /postagens não existe no backend');
-    return { success: true };
-  },
+  criarPostagem: async () => ({ success: true }),
 
-  comentar: async () => {
-    console.warn('Endpoint /postagens não existe no backend');
-    return { success: true };
-  },
+  comentar: async () => ({ success: true }),
 };
 
-// ========== SUPORTE (mock) ==========
+// ========== SUPORTE (MOCK) ==========
 
 export const suporteService = {
-  listarPsicologos: async () => {
-    return [
-      {
-        id: 1,
-        nome: 'Em breve',
-        especialidade: 'Aguarde atualização',
-        telefone: '',
-        email: ''
-      }
-    ];
-  },
+  listarPsicologos: async () => [
+    {
+      id: 1,
+      nome: 'Em breve',
+      especialidade: 'Aguarde atualização',
+      telefone: '',
+      email: ''
+    }
+  ],
 
-  listarNutricionistas: async () => {
-    return [
-      {
-        id: 1,
-        nome: 'Em breve',
-        especialidade: 'Aguarde atualização',
-        telefone: '',
-        email: ''
-      }
-    ];
-  },
+  listarNutricionistas: async () => [
+    {
+      id: 1,
+      nome: 'Em breve',
+      especialidade: 'Aguarde atualização',
+      telefone: '',
+      email: ''
+    }
+  ],
 };
 
 export default api;
