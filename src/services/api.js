@@ -40,11 +40,9 @@ api.interceptors.response.use(
 // ========== AUTENTICAÇÃO ==========
 
 export const authService = {
-  // ✅ LOGIN - Ajustado para seu backend
   login: async (email, senha) => {
     const response = await api.post('/login', { email, senha });
     
-    // Seu backend retorna: { id, nome, email, tipo, token }
     const data = response.data;
     
     return {
@@ -58,26 +56,24 @@ export const authService = {
     };
   },
 
-  // ✅ CADASTRAR ALUNO - Usando endpoint /cadastro
   cadastrarAluno: async (dados) => {
     const payload = {
       nome: dados.nome,
       email: dados.email,
       senha: dados.senha,
-      tipo: 'ALUNO' // Força o tipo como ALUNO
+      tipo: 'ALUNO'
     };
     
     const response = await api.post('/cadastro', payload);
     return response.data;
   },
 
-  // ✅ CADASTRAR PERSONAL - Usando endpoint /cadastro
   cadastrarPersonal: async (dados) => {
     const payload = {
       nome: dados.nome,
       email: dados.email,
       senha: dados.senha,
-      tipo: 'PERSONAL' // Força o tipo como PERSONAL
+      tipo: 'PERSONAL'
     };
     
     const response = await api.post('/cadastro', payload);
@@ -88,9 +84,7 @@ export const authService = {
 // ========== TREINOS ==========
 
 export const treinoService = {
-  // ✅ LISTAR TREINOS DO ALUNO - Usando path param
   listarTreinosAluno: async (alunoId) => {
-    // Se não passar alunoId, pega do localStorage
     if (!alunoId) {
       const user = JSON.parse(localStorage.getItem('user'));
       alunoId = user?.id;
@@ -100,13 +94,11 @@ export const treinoService = {
     return response.data;
   },
 
-  // ✅ BUSCAR DETALHES DE UM TREINO
   buscarTreino: async (id) => {
     const response = await api.get(`/treinos/${id}`);
     return response.data;
   },
 
-  // ✅ CRIAR TREINO
   criarTreino: async (dados) => {
     const response = await api.post('/treinos', dados);
     return response.data;
@@ -116,7 +108,6 @@ export const treinoService = {
 // ========== DIÁRIO DE TREINO ==========
 
 export const diarioService = {
-  // ✅ CRIAR REGISTRO - Endpoint: /diarios
   criarRegistro: async (dados) => {
     const user = JSON.parse(localStorage.getItem('user'));
 
@@ -126,15 +117,13 @@ export const diarioService = {
 
     const payload = {
       ...dados,
-      alunoId: user.id, // obrigatório para o backend
+      alunoId: user.id,
     };
 
     const response = await api.post('/diarios', payload);
-    // Backend retorna ApiResponse<DiarioResponse>
     return response.data.data;
   },
 
-  // ✅ LISTAR REGISTROS - Endpoint: /diarios?alunoId=...
   listarRegistros: async () => {
     const user = JSON.parse(localStorage.getItem('user'));
 
@@ -146,7 +135,6 @@ export const diarioService = {
       params: { alunoId: user.id },
     });
 
-    // Backend retorna ApiResponse<List<DiarioResponse>>
     return response.data.data || [];
   },
 };
@@ -154,13 +142,13 @@ export const diarioService = {
 // ========== DESAFIOS ==========
 
 export const desafioService = {
-  // ✅ LISTAR TODOS OS DESAFIOS
+  // LISTAR TODOS
   listarDesafios: async () => {
     const response = await api.get('/desafios');
-    return response.data;
+    return response.data; // List<DesafioResponse>
   },
 
-  // ✅ PARTICIPAR DE UM DESAFIO
+  // PARTICIPAR
   participar: async (desafioId) => {
     const user = JSON.parse(localStorage.getItem('user'));
     const response = await api.post(`/desafios/${desafioId}/participar`, {
@@ -170,26 +158,34 @@ export const desafioService = {
     return response.data;
   },
 
-  // ✅ LISTAR MEUS DESAFIOS
+  // MEUS DESAFIOS
   meusDesafios: async () => {
     const user = JSON.parse(localStorage.getItem('user'));
     const response = await api.get(`/desafios/${user?.id}`);
     return response.data;
   },
 
-  // ✅ CRIAR DESAFIO
+  // CRIAR DESAFIO (CORRIGIDO)
   criarDesafio: async (dados) => {
-    const response = await api.post('/desafios', dados);
+    const user = JSON.parse(localStorage.getItem('user'));
+
+    const payload = {
+      alunoId: user?.id,                     // obrigatório no backend
+      titulo: dados.titulo,
+      descricao: dados.descricao,
+      meta: dados.meta,
+      dataInicio: new Date(dados.dataInicio).toISOString(),
+      dataFim: new Date(dados.dataFim).toISOString(),
+    };
+
+    const response = await api.post('/desafios', payload);
     return response.data;
   },
 };
 
-// ========== COMUNIDADE (NÃO IMPLEMENTADO NO BACKEND) ==========
+// ========== COMUNIDADE (mock) ==========
 
 export const comunidadeService = {
-  // ⚠️ Seu backend não tem esses endpoints ainda
-  // Vamos retornar dados mockados por enquanto
-  
   listarPostagens: async () => {
     console.warn('Endpoint /postagens não existe no backend');
     return [
@@ -203,24 +199,21 @@ export const comunidadeService = {
     ];
   },
 
-  criarPostagem: async (dados) => {
+  criarPostagem: async () => {
     console.warn('Endpoint /postagens não existe no backend');
-    return { success: true, message: 'Funcionalidade em desenvolvimento' };
+    return { success: true };
   },
 
-  comentar: async (postagemId, texto) => {
+  comentar: async () => {
     console.warn('Endpoint /postagens não existe no backend');
     return { success: true };
   },
 };
 
-// ========== SUPORTE (NÃO IMPLEMENTADO NO BACKEND) ==========
+// ========== SUPORTE (mock) ==========
 
 export const suporteService = {
-  // ⚠️ Seu backend não tem esses endpoints ainda
-  
   listarPsicologos: async () => {
-    console.warn('Endpoint /suporte-psicologico não existe no backend');
     return [
       {
         id: 1,
@@ -233,7 +226,6 @@ export const suporteService = {
   },
 
   listarNutricionistas: async () => {
-    console.warn('Endpoint /suporte-nutricional não existe no backend');
     return [
       {
         id: 1,

@@ -6,7 +6,7 @@ const CardDesafio = ({ desafio, onParticipar, estaParticipando }) => {
     <div className="card">
       <div className="flex items-start justify-between mb-3">
         <div className="flex-1">
-          <h3 className="text-lg font-bold text-dark mb-2">{desafio.nome}</h3>
+<h3 className="text-lg font-bold text-dark mb-2">{desafio.titulo}</h3>
           <p className="text-sm text-gray-600 mb-3">{desafio.descricao}</p>
         </div>
         <span className="text-3xl ml-2">🏆</span>
