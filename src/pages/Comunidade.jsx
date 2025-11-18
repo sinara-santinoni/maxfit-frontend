@@ -4,10 +4,6 @@ import BottomNav from '../components/BottomNav';
 import CardPostagem from '../components/CardPostagem';
 import { comunidadeService } from '../services/api';
 
-/**
- * Página de Comunidade
- * Feed de postagens com possibilidade de criar posts e comentar
- */
 const Comunidade = () => {
   const [postagens, setPostagens] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -22,7 +18,7 @@ const Comunidade = () => {
     try {
       setLoading(true);
       const data = await comunidadeService.listarPostagens();
-      setPostagens(data);
+      setPostagens(data || []);
     } catch (error) {
       console.error('Erro ao carregar postagens:', error);
     } finally {
@@ -32,19 +28,18 @@ const Comunidade = () => {
 
   const handleCriarPostagem = async (e) => {
     e.preventDefault();
-    
-    if (!novaPostagem.trim()) {
-      return;
-    }
+
+    if (!novaPostagem.trim()) return;
 
     try {
       setLoading(true);
-      await comunidadeService.criarPostagem({ texto: novaPostagem });
-      
+
+      // 🔥 AQUI ESTÁ A CORREÇÃO: enviar APENAS o texto (string)
+      await comunidadeService.criarPostagem(novaPostagem);
+
       setNovaPostagem('');
       setMostrarFormulario(false);
-      
-      // Recarregar postagens
+
       await carregarPostagens();
     } catch (error) {
       console.error('Erro ao criar postagem:', error);
@@ -57,8 +52,6 @@ const Comunidade = () => {
   const handleComentar = async (postagemId, texto) => {
     try {
       await comunidadeService.comentar(postagemId, texto);
-      
-      // Recarregar postagens para atualizar os comentários
       await carregarPostagens();
     } catch (error) {
       console.error('Erro ao comentar:', error);
@@ -71,7 +64,7 @@ const Comunidade = () => {
       <Header title="Comunidade" />
 
       <main className="pt-20 px-4 max-w-md mx-auto">
-        {/* Botão para criar nova postagem */}
+        
         <button
           onClick={() => setMostrarFormulario(!mostrarFormulario)}
           className="btn-primary mb-6"
@@ -79,13 +72,12 @@ const Comunidade = () => {
           {mostrarFormulario ? '✕ Cancelar' : '+ Nova Postagem'}
         </button>
 
-        {/* Formulário de nova postagem */}
         {mostrarFormulario && (
           <div className="card mb-6">
             <h3 className="text-lg font-bold text-dark mb-3">
               O que você está pensando?
             </h3>
-            
+
             <form onSubmit={handleCriarPostagem}>
               <textarea
                 value={novaPostagem}
@@ -95,7 +87,7 @@ const Comunidade = () => {
                 className="input-field resize-none mb-3"
                 maxLength="500"
               ></textarea>
-              
+
               <div className="flex justify-between items-center">
                 <span className="text-sm text-gray-500">
                   {novaPostagem.length}/500
@@ -112,14 +104,12 @@ const Comunidade = () => {
           </div>
         )}
 
-        {/* Loading */}
         {loading && !mostrarFormulario && (
           <div className="flex justify-center py-12">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
           </div>
         )}
 
-        {/* Feed vazio */}
         {!loading && postagens.length === 0 && (
           <div className="text-center py-12">
             <p className="text-5xl mb-4">👥</p>
@@ -130,7 +120,6 @@ const Comunidade = () => {
           </div>
         )}
 
-        {/* Feed de postagens */}
         {!loading && postagens.length > 0 && (
           <div className="space-y-4">
             {postagens.map((postagem) => (

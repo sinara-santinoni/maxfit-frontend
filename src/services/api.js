@@ -152,18 +152,28 @@ export const desafioService = {
     (await api.delete(`/desafios/${desafioId}`)).data,
 };
 
-// ========== COMUNIDADE MOCK ==========
+// ========== COMUNIDADE (AGORA BATENDO NO BACK) ==========
+
 export const comunidadeService = {
-  listarPostagens: async () => [
-    {
-      id: 1,
-      usuario: { nome: 'Sistema' },
-      texto: 'Bem-vindo ao MaxFit! Em breve teremos comunidade.',
-      dataHora: new Date().toISOString(),
-      comentarios: []
-    }
-  ],
+  listarPostagens: async () => {
+    const resp = await api.get('/comunidade');
+    // backend retorna List<PostagemResponse>
+    return resp.data;
+  },
+
+  criarPostagem: async (texto) => {
+    const user = JSON.parse(localStorage.getItem('user'));
+
+    const resp = await api.post('/comunidade', {
+      usuarioId: user?.id,
+      texto,
+    });
+
+    // backend retorna ApiResponse<PostagemResponse>
+    return resp.data.data;
+  },
 };
+
 
 // ========== SUPORTE ==========
 export const suporteService = {
