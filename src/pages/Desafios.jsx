@@ -108,12 +108,21 @@ const Desafios = () => {
     }
   };
 
+  // VERIFICA PARTICIPAÇÃO
   const estaParticipando = (desafioId) => {
     return meusDesafios.some((d) => d.id === desafioId);
   };
 
-  const desafiosExibidos =
-    abaSelecionada === 'todos' ? desafios : meusDesafios;
+  // 🔥 AGORA COM 3 ABAS: TODOS / MEUS / CONCLUÍDOS
+  let desafiosExibidos = desafios;
+
+  if (abaSelecionada === 'meus') {
+    desafiosExibidos = meusDesafios;
+  }
+
+  if (abaSelecionada === 'concluidos') {
+    desafiosExibidos = desafios.filter((d) => d.status === 'CONCLUIDO');
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 pb-24">
@@ -240,7 +249,7 @@ const Desafios = () => {
                 : 'bg-white text-gray-700 border border-gray-300'
             }`}
           >
-            Todos os Desafios
+            Todos
           </button>
 
           <button
@@ -251,7 +260,18 @@ const Desafios = () => {
                 : 'bg-white text-gray-700 border border-gray-300'
             }`}
           >
-            Meus Desafios ({meusDesafios.length})
+            Meus ({meusDesafios.length})
+          </button>
+
+          <button
+            onClick={() => setAbaSelecionada('concluidos')}
+            className={`flex-1 py-3 rounded-lg font-semibold transition-colors ${
+              abaSelecionada === 'concluidos'
+                ? 'bg-green-600 text-white'
+                : 'bg-white text-gray-700 border border-gray-300'
+            }`}
+          >
+            Concluídos
           </button>
         </div>
 
