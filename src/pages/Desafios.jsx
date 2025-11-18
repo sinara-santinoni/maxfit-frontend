@@ -6,19 +6,18 @@ import { desafioService } from '../services/api';
 
 /**
  * Página de Desafios
- * Lista desafios disponíveis, permite participar
- * e (se for PERSONAL) criar novos desafios
+ * Lista desafios, permite participar e criar novos (Aluno ou Personal)
  */
 const Desafios = () => {
   const [desafios, setDesafios] = useState([]);
   const [meusDesafios, setMeusDesafios] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [abaSelecionada, setAbaSelecionada] = useState('todos'); // 'todos' ou 'meus'
+  const [abaSelecionada, setAbaSelecionada] = useState('todos');
 
   // usuário logado
   const user = JSON.parse(localStorage.getItem('user'));
 
-  // formulário de criação de desafio (para personal)
+  // formulário de criação
   const [mostrarFormulario, setMostrarFormulario] = useState(false);
   const [formData, setFormData] = useState({
     titulo: '',
@@ -39,7 +38,7 @@ const Desafios = () => {
         desafioService.listarDesafios(),
         desafioService.meusDesafios(),
       ]);
-      
+
       setDesafios(todosDesafios || []);
       setMeusDesafios(participando || []);
     } catch (error) {
@@ -55,7 +54,7 @@ const Desafios = () => {
       alert('Você entrou no desafio! Boa sorte! 🎉');
       await carregarDesafios();
     } catch (error) {
-      console.error('Erro ao participar do desafio:', error);
+      console.error('Erro ao participar:', error);
       alert('Erro ao participar do desafio');
     }
   };
@@ -65,6 +64,7 @@ const Desafios = () => {
     try {
       await desafioService.criarDesafio(formData);
       alert('Desafio criado com sucesso! 🏆');
+
       setMostrarFormulario(false);
       setFormData({
         titulo: '',
@@ -73,6 +73,7 @@ const Desafios = () => {
         dataInicio: '',
         dataFim: '',
       });
+
       await carregarDesafios();
     } catch (error) {
       console.error('Erro ao criar desafio:', error);
@@ -80,7 +81,7 @@ const Desafios = () => {
     }
   };
 
-  // Verificar se o usuário já está participando
+  // verifica se já participa
   const estaParticipando = (desafioId) => {
     return meusDesafios.some((d) => d.id === desafioId);
   };
@@ -92,8 +93,9 @@ const Desafios = () => {
       <Header title="Desafios" />
 
       <main className="pt-20 px-4 max-w-md mx-auto">
-        {/* Botão para criar desafio (apenas PERSONAL) */}
-        {user?.tipo === 'PERSONAL' && (
+
+        {/* Botão Criar Desafio (Agora ALUNO e PERSONAL) */}
+        {(user?.tipo === 'PERSONAL' || user?.tipo === 'ALUNO') && (
           <button
             onClick={() => setMostrarFormulario((prev) => !prev)}
             className="btn-primary mb-4 w-full"
@@ -102,12 +104,13 @@ const Desafios = () => {
           </button>
         )}
 
-        {/* Formulário de criação de desafio */}
-        {user?.tipo === 'PERSONAL' && mostrarFormulario && (
+        {/* Formulário de criação */}
+        {(user?.tipo === 'PERSONAL' || user?.tipo === 'ALUNO') && mostrarFormulario && (
           <div className="card mb-6">
             <h3 className="text-lg font-bold text-dark mb-4">Novo Desafio</h3>
 
             <form onSubmit={handleCriarDesafio} className="space-y-4">
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Título *
@@ -139,7 +142,7 @@ const Desafios = () => {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Meta (ex: "Treinar 3x por semana") *
+                  Meta *
                 </label>
                 <input
                   type="text"
@@ -167,6 +170,7 @@ const Desafios = () => {
                     required
                   />
                 </div>
+
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Fim *
@@ -186,6 +190,7 @@ const Desafios = () => {
               <button type="submit" className="btn-primary w-full">
                 Salvar Desafio
               </button>
+
             </form>
           </div>
         )}
@@ -202,6 +207,7 @@ const Desafios = () => {
           >
             Todos os Desafios
           </button>
+
           <button
             onClick={() => setAbaSelecionada('meus')}
             className={`flex-1 py-3 rounded-lg font-semibold transition-colors ${
@@ -214,7 +220,7 @@ const Desafios = () => {
           </button>
         </div>
 
-        {/* Banner motivacional */}
+        {/* Banner */}
         <div className="bg-gradient-to-r from-yellow-400 to-orange-500 rounded-xl p-5 mb-6 text-white shadow-lg">
           <h3 className="text-xl font-bold mb-2">🏆 Desafie-se!</h3>
           <p className="text-sm text-white/90">
@@ -237,9 +243,6 @@ const Desafios = () => {
               {abaSelecionada === 'todos'
                 ? 'Nenhum desafio disponível'
                 : 'Você não está participando de nenhum desafio'}
-            </p>
-            <p className="text-sm text-gray-500">
-              {abaSelecionada === 'meus' && 'Que tal participar de um desafio?'}
             </p>
           </div>
         )}
