@@ -111,7 +111,13 @@ export const desafioService = {
     return (await api.get(`/desafios/${user.id}`)).data;
   },
 
-  // PARTICIPAR
+  // 🆕 LISTAR PARTICIPANTES (NOVO - NÃO MEXE NOS ANTIGOS)
+  listarParticipantes: async (desafioId) => {
+    const response = await api.get(`/desafios/${desafioId}/participantes`);
+    return response.data.data || [];
+  },
+
+  // PARTICIPAR (MANTIDO COMO ESTÁ)
   participar: async (desafioId) => {
     const user = JSON.parse(localStorage.getItem('user'));
     return (
@@ -122,7 +128,15 @@ export const desafioService = {
     ).data;
   },
 
-  // CRIAR
+  // 🆕 SAIR DO DESAFIO (NOVO - NÃO MEXE NOS ANTIGOS)
+  sair: async (desafioId) => {
+    const user = JSON.parse(localStorage.getItem('user'));
+    return (
+      await api.delete(`/desafios/${desafioId}/participar/${user.id}`)
+    ).data;
+  },
+
+  // CRIAR (MANTIDO COMO ESTÁ)
   criarDesafio: async (dados) => {
     const user = JSON.parse(localStorage.getItem('user'));
 
@@ -138,7 +152,7 @@ export const desafioService = {
     return (await api.post('/desafios', payload)).data;
   },
 
-  // CONCLUIR (AJUSTADO PARA O BACKEND)
+  // CONCLUIR (MANTIDO COMO ESTÁ)
   concluirDesafio: async (desafioId) => {
     const user = JSON.parse(localStorage.getItem('user'));
 
@@ -147,13 +161,12 @@ export const desafioService = {
     ).data;
   },
 
-  // EXCLUIR (OK)
+  // EXCLUIR (MANTIDO COMO ESTÁ)
   excluirDesafio: async (desafioId) =>
     (await api.delete(`/desafios/${desafioId}`)).data,
 };
 
-// ========== COMUNIDADE (AGORA BATENDO NO BACK) ==========
-
+// ========== COMUNIDADE ==========
 export const comunidadeService = {
   listarPostagens: async () => {
     const resp = await api.get('/comunidade');
@@ -173,7 +186,6 @@ export const comunidadeService = {
     return resp.data.data;
   },
 };
-
 
 // ========== SUPORTE ==========
 export const suporteService = {
