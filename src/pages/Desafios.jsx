@@ -14,7 +14,9 @@ const Desafios = () => {
   const [loading, setLoading] = useState(true);
   const [abaSelecionada, setAbaSelecionada] = useState('todos');
 
-  const user = JSON.parse(localStorage.getItem('user'));
+  // 💡 Protege o JSON.parse caso não exista "user" no localStorage
+  const storedUser = typeof window !== 'undefined' ? localStorage.getItem('user') : null;
+  const user = storedUser ? JSON.parse(storedUser) : null;
 
   // formulário
   const [mostrarFormulario, setMostrarFormulario] = useState(false);
@@ -52,7 +54,15 @@ const Desafios = () => {
     try {
       await desafioService.participar(desafioId);
       alert('Você entrou no desafio! 🎉');
+
+      // recarrega listas
       await carregarDesafios();
+
+      // 👇 automaticamente vai para "Meus desafios"
+      setAbaSelecionada('meus');
+
+      // sobe a tela pro topo (melhor experiência no celular)
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     } catch (error) {
       console.error('Erro ao participar:', error);
       alert('Erro ao participar do desafio');
@@ -76,6 +86,8 @@ const Desafios = () => {
       });
 
       await carregarDesafios();
+      // opcional: pode já deixar na aba "todos" ou "meus"
+      // setAbaSelecionada('todos');
     } catch (error) {
       console.error('Erro ao criar desafio:', error);
       alert('Erro ao criar desafio');
@@ -118,11 +130,9 @@ const Desafios = () => {
 
   if (abaSelecionada === 'todos') {
     desafiosExibidos = desafios.filter((d) => d.status !== 'CONCLUIDO');
-  } 
-  else if (abaSelecionada === 'meus') {
+  } else if (abaSelecionada === 'meus') {
     desafiosExibidos = meusDesafios.filter((d) => d.status !== 'CONCLUIDO');
-  }
-  else if (abaSelecionada === 'concluidos') {
+  } else if (abaSelecionada === 'concluidos') {
     desafiosExibidos = meusDesafios.filter((d) => d.status === 'CONCLUIDO');
   }
 
@@ -130,19 +140,20 @@ const Desafios = () => {
     <div className="min-h-screen bg-gray-50 pb-24">
       <Header title="Desafios" />
 
+      {/* max-w-md + px-4 já deixa bem mobile; margin auto centraliza em telas maiores */}
       <main className="pt-20 px-4 max-w-md mx-auto">
 
         {/* Criar Desafio */}
         {(user?.tipo === 'PERSONAL' || user?.tipo === 'ALUNO') && (
           <button
             onClick={() => setMostrarFormulario((prev) => !prev)}
-            className="btn-primary mb-4 w-full"
+            className="btn-primary mb-4 w-full py-3 text-sm font-semibold"
           >
             {mostrarFormulario ? '✕ Cancelar' : '+ Criar Desafio'}
           </button>
         )}
 
-        {/* FORMULÁRIO */}
+        {/* FORMULÁRIO — layout pensadinho pro celular */}
         {(user?.tipo === 'PERSONAL' || user?.tipo === 'ALUNO') &&
           mostrarFormulario && (
             <div className="card mb-6">
@@ -173,7 +184,7 @@ const Desafios = () => {
                   </label>
                   <textarea
                     className="input-field resize-none"
-                    rows={2}
+                    rows={3}
                     value={formData.descricao}
                     onChange={(e) =>
                       setFormData({ ...formData, descricao: e.target.value })
@@ -196,14 +207,15 @@ const Desafios = () => {
                   />
                 </div>
 
-                <div className="grid grid-cols-2 gap-3">
+                {/* No celular, fica 1 coluna; em telas maiores vira 2 colunas */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
                       Início *
                     </label>
                     <input
                       type="datetime-local"
-                      className="input-field"
+                      className="input-field text-sm"
                       value={formData.dataInicio}
                       onChange={(e) =>
                         setFormData({
@@ -221,7 +233,7 @@ const Desafios = () => {
                     </label>
                     <input
                       type="datetime-local"
-                      className="input-field"
+                      className="input-field text-sm"
                       value={formData.dataFim}
                       onChange={(e) =>
                         setFormData({
@@ -234,7 +246,7 @@ const Desafios = () => {
                   </div>
                 </div>
 
-                <button type="submit" className="btn-primary w-full">
+                <button type="submit" className="btn-primary w-full py-3 text-sm font-semibold">
                   Salvar Desafio
                 </button>
               </form>
@@ -243,10 +255,9 @@ const Desafios = () => {
 
         {/* Abas */}
         <div className="flex gap-2 mb-6">
-          
           <button
             onClick={() => setAbaSelecionada('todos')}
-            className={`flex-1 py-3 rounded-lg font-semibold transition-colors ${
+            className={`flex-1 py-3 rounded-lg font-semibold text-xs sm:text-sm transition-colors ${
               abaSelecionada === 'todos'
                 ? 'bg-primary text-white'
                 : 'bg-white text-gray-700 border border-gray-300'
@@ -257,7 +268,7 @@ const Desafios = () => {
 
           <button
             onClick={() => setAbaSelecionada('meus')}
-            className={`flex-1 py-3 rounded-lg font-semibold transition-colors ${
+            className={`flex-1 py-3 rounded-lg font-semibold text-xs sm:text-sm transition-colors ${
               abaSelecionada === 'meus'
                 ? 'bg-primary text-white'
                 : 'bg-white text-gray-700 border border-gray-300'
@@ -268,7 +279,7 @@ const Desafios = () => {
 
           <button
             onClick={() => setAbaSelecionada('concluidos')}
-            className={`flex-1 py-3 rounded-lg font-semibold transition-colors ${
+            className={`flex-1 py-3 rounded-lg font-semibold text-xs sm:text-sm transition-colors ${
               abaSelecionada === 'concluidos'
                 ? 'bg-green-600 text-white'
                 : 'bg-white text-gray-700 border border-gray-300'

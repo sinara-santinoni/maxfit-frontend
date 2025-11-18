@@ -8,7 +8,9 @@ const CardDesafio = ({
   onConcluir,
   estaParticipando,
 }) => {
-  const user = JSON.parse(localStorage.getItem("user"));
+  // Protege o JSON.parse
+  const storedUser = typeof window !== 'undefined' ? localStorage.getItem('user') : null;
+  const user = storedUser ? JSON.parse(storedUser) : null;
 
   return (
     <div className="card">
@@ -20,17 +22,17 @@ const CardDesafio = ({
         <span className="text-3xl ml-2">🏆</span>
       </div>
 
-      <div className="grid grid-cols-2 gap-3 mb-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
         <div className="bg-gray-50 p-3 rounded-lg">
           <p className="text-xs text-gray-600 mb-1">Início</p>
           <p className="text-sm font-semibold">
-            {new Date(desafio.dataInicio).toLocaleDateString("pt-BR")}
+            {new Date(desafio.dataInicio).toLocaleDateString('pt-BR')}
           </p>
         </div>
         <div className="bg-gray-50 p-3 rounded-lg">
           <p className="text-xs text-gray-600 mb-1">Término</p>
           <p className="text-sm font-semibold">
-            {new Date(desafio.dataFim).toLocaleDateString("pt-BR")}
+            {new Date(desafio.dataFim).toLocaleDateString('pt-BR')}
           </p>
         </div>
       </div>
@@ -54,14 +56,14 @@ const CardDesafio = ({
         <div className="flex gap-2 mt-3">
           <button
             onClick={() => onConcluir(desafio.id)}
-            className="flex-1 bg-blue-500 text-white py-2 rounded-lg font-semibold"
+            className="flex-1 bg-blue-500 text-white py-2 rounded-lg font-semibold text-sm"
           >
             ✔ Concluir
           </button>
 
           <button
             onClick={() => onExcluir(desafio.id)}
-            className="flex-1 bg-red-500 text-white py-2 rounded-lg font-semibold"
+            className="flex-1 bg-red-500 text-white py-2 rounded-lg font-semibold text-sm"
           >
             🗑 Excluir
           </button>
