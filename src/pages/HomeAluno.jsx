@@ -52,7 +52,7 @@ const HomeAluno = () => {
       title: 'Meu Progresso',
       icon: '📊',
       description: 'Acompanhe sua evolução',
-      path: '/progresso',
+      path: '/meu-progresso',   // ✅ CORRIGIDO
       color: 'bg-indigo-500',
     },
   ];
@@ -82,7 +82,9 @@ const HomeAluno = () => {
               onClick={() => navigate(item.path)}
               className="bg-white rounded-xl p-5 shadow-md hover:shadow-lg transition-all active:scale-95"
             >
-              <div className={`${item.color} w-14 h-14 rounded-full flex items-center justify-center text-3xl mb-3 mx-auto`}>
+              <div
+                className={`${item.color} w-14 h-14 rounded-full flex items-center justify-center text-3xl mb-3 mx-auto`}
+              >
                 {item.icon}
               </div>
               <h3 className="font-bold text-dark mb-1 text-sm">

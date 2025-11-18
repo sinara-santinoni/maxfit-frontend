@@ -13,6 +13,7 @@ import DiarioTreino from './pages/DiarioTreino';
 import Desafios from './pages/Desafios';
 import Comunidade from './pages/Comunidade';
 import Suporte from './pages/Suporte';
+import MeuProgresso from './pages/MeuProgresso'; // 🌟 NOVO
 
 // Páginas do personal
 import HomePersonal from './pages/HomePersonal';
@@ -95,6 +96,16 @@ function App() {
             element={
               <PrivateRoute>
                 <Suporte />
+              </PrivateRoute>
+            }
+          />
+
+          {/* 🌟 NOVA ROTA: MEU PROGRESSO (ALUNO) */}
+          <Route
+            path="/meu-progresso"
+            element={
+              <PrivateRoute requiredType="ALUNO">
+                <MeuProgresso />
               </PrivateRoute>
             }
           />
