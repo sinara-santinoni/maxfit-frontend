@@ -10,19 +10,17 @@ const api = axios.create({
   },
 });
 
-// Interceptor para adicionar token
+// Interceptor para token
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('token');
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
+    if (token) config.headers.Authorization = `Bearer ${token}`;
     return config;
   },
   (error) => Promise.reject(error)
 );
 
-// Interceptor para tratar erros
+// Interceptor para erros
 api.interceptors.response.use(
   (response) => response,
   (error) => {
@@ -36,7 +34,6 @@ api.interceptors.response.use(
 );
 
 // ========== AUTENTICAÇÃO ==========
-
 export const authService = {
   login: async (email, senha) => {
     const response = await api.post('/login', { email, senha });
@@ -60,9 +57,7 @@ export const authService = {
       senha: dados.senha,
       tipo: 'ALUNO'
     };
-
-    const response = await api.post('/cadastro', payload);
-    return response.data;
+    return (await api.post('/cadastro', payload)).data;
   },
 
   cadastrarPersonal: async (dados) => {
@@ -72,97 +67,67 @@ export const authService = {
       senha: dados.senha,
       tipo: 'PERSONAL'
     };
-
-    const response = await api.post('/cadastro', payload);
-    return response.data;
+    return (await api.post('/cadastro', payload)).data;
   },
 };
 
 // ========== TREINOS ==========
-
 export const treinoService = {
   listarTreinosAluno: async (alunoId) => {
-    if (!alunoId) {
-      const user = JSON.parse(localStorage.getItem('user'));
-      alunoId = user?.id;
-    }
-
-    const response = await api.get(`/treinos/${alunoId}`);
-    return response.data;
+    if (!alunoId) alunoId = JSON.parse(localStorage.getItem('user'))?.id;
+    return (await api.get(`/treinos/${alunoId}`)).data;
   },
 
-  buscarTreino: async (id) => {
-    const response = await api.get(`/treinos/${id}`);
-    return response.data;
-  },
+  buscarTreino: async (id) => (await api.get(`/treinos/${id}`)).data,
 
-  criarTreino: async (dados) => {
-    const response = await api.post('/treinos', dados);
-    return response.data;
-  },
+  criarTreino: async (dados) => (await api.post('/treinos', dados)).data,
 };
 
-// ========== DIÁRIO DE TREINO ==========
-
+// ========== DIÁRIO ==========
 export const diarioService = {
   criarRegistro: async (dados) => {
     const user = JSON.parse(localStorage.getItem('user'));
-
-    if (!user?.id) throw new Error('Usuário não encontrado no localStorage');
-
     const payload = { ...dados, alunoId: user.id };
-
-    const response = await api.post('/diarios', payload);
-    return response.data.data;
+    return (await api.post('/diarios', payload)).data.data;
   },
 
   listarRegistros: async () => {
     const user = JSON.parse(localStorage.getItem('user'));
-
-    if (!user?.id) throw new Error('Usuário não encontrado no localStorage');
-
     const response = await api.get('/diarios', {
-      params: { alunoId: user.id },
+      params: { alunoId: user.id }
     });
-
     return response.data.data || [];
   },
 };
 
 // ========== DESAFIOS ==========
-
 export const desafioService = {
-  // LISTAR TODOS OS DESAFIOS
-  listarDesafios: async () => {
-    const response = await api.get('/desafios');
-    return response.data;
-  },
+  // LISTAR TODOS
+  listarDesafios: async () => (await api.get('/desafios')).data,
 
-  // LISTAR DESAFIOS DO USUÁRIO
+  // LISTAR DO ALUNO
   meusDesafios: async () => {
     const user = JSON.parse(localStorage.getItem('user'));
-    const response = await api.get(`/desafios/${user?.id}`);
-    return response.data;
+    return (await api.get(`/desafios/${user.id}`)).data;
   },
 
-  // PARTICIPAR DO DESAFIO
+  // PARTICIPAR
   participar: async (desafioId) => {
     const user = JSON.parse(localStorage.getItem('user'));
-
-    const response = await api.post(`/desafios/${desafioId}/participar`, {
-      alunoId: user?.id,
-      progressoAtual: 0,
-    });
-
-    return response.data;
+    return (
+      await api.post(`/desafios/${desafioId}/participar`, {
+        alunoId: user.id,
+        progressoAtual: 0
+      })
+    ).data;
   },
 
-  // CRIAR DESAFIO
+  // CRIAR
   criarDesafio: async (dados) => {
     const user = JSON.parse(localStorage.getItem('user'));
 
     const payload = {
-      alunoId: user?.id,
+      alunoId: user.id,
       titulo: dados.titulo,
       descricao: dados.descricao,
       meta: dados.meta,
@@ -170,45 +135,37 @@ export const desafioService = {
       dataFim: new Date(dados.dataFim).toISOString(),
     };
 
-    const response = await api.post('/desafios', payload);
-    return response.data;
+    return (await api.post('/desafios', payload)).data;
   },
 
-  // CONCLUIR DESAFIO
+  // CONCLUIR (AJUSTADO PARA O BACKEND)
   concluirDesafio: async (desafioId) => {
-    const response = await api.put(`/desafios/${desafioId}/concluir`);
-    return response.data;
+    const user = JSON.parse(localStorage.getItem('user'));
+
+    return (
+      await api.post(`/desafios/${desafioId}/concluir?alunoId=${user.id}`)
+    ).data;
   },
 
-  // EXCLUIR DESAFIO
-  excluirDesafio: async (desafioId) => {
-    const response = await api.delete(`/desafios/${desafioId}`);
-    return response.data;
-  },
+  // EXCLUIR (OK)
+  excluirDesafio: async (desafioId) =>
+    (await api.delete(`/desafios/${desafioId}`)).data,
 };
 
-// ========== COMUNIDADE (MOCK) ==========
-
+// ========== COMUNIDADE MOCK ==========
 export const comunidadeService = {
-  listarPostagens: async () => {
-    return [
-      {
-        id: 1,
-        usuario: { nome: 'Sistema' },
-        texto: 'Bem-vindo ao MaxFit! Em breve teremos comunidade.',
-        dataHora: new Date().toISOString(),
-        comentarios: []
-      }
-    ];
-  },
-
-  criarPostagem: async () => ({ success: true }),
-
-  comentar: async () => ({ success: true }),
+  listarPostagens: async () => [
+    {
+      id: 1,
+      usuario: { nome: 'Sistema' },
+      texto: 'Bem-vindo ao MaxFit! Em breve teremos comunidade.',
+      dataHora: new Date().toISOString(),
+      comentarios: []
+    }
+  ],
 };
 
-// ========== SUPORTE (MOCK) ==========
-
+// ========== SUPORTE ==========
 export const suporteService = {
   listarPsicologos: async () => [
     {
@@ -219,7 +176,6 @@ export const suporteService = {
       email: ''
     }
   ],
-
   listarNutricionistas: async () => [
     {
       id: 1,
