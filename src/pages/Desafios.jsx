@@ -6,13 +6,27 @@ import { desafioService } from '../services/api';
 
 /**
  * Página de Desafios
- * Lista desafios disponíveis e permite participar
+ * Lista desafios disponíveis, permite participar
+ * e (se for PERSONAL) criar novos desafios
  */
 const Desafios = () => {
   const [desafios, setDesafios] = useState([]);
   const [meusDesafios, setMeusDesafios] = useState([]);
   const [loading, setLoading] = useState(true);
   const [abaSelecionada, setAbaSelecionada] = useState('todos'); // 'todos' ou 'meus'
+
+  // usuário logado
+  const user = JSON.parse(localStorage.getItem('user'));
+
+  // formulário de criação de desafio (para personal)
+  const [mostrarFormulario, setMostrarFormulario] = useState(false);
+  const [formData, setFormData] = useState({
+    titulo: '',
+    descricao: '',
+    meta: '',
+    dataInicio: '',
+    dataFim: '',
+  });
 
   useEffect(() => {
     carregarDesafios();
@@ -26,8 +40,8 @@ const Desafios = () => {
         desafioService.meusDesafios(),
       ]);
       
-      setDesafios(todosDesafios);
-      setMeusDesafios(participando);
+      setDesafios(todosDesafios || []);
+      setMeusDesafios(participando || []);
     } catch (error) {
       console.error('Erro ao carregar desafios:', error);
     } finally {
@@ -39,11 +53,30 @@ const Desafios = () => {
     try {
       await desafioService.participar(desafioId);
       alert('Você entrou no desafio! Boa sorte! 🎉');
-      // Recarregar desafios
       await carregarDesafios();
     } catch (error) {
       console.error('Erro ao participar do desafio:', error);
       alert('Erro ao participar do desafio');
+    }
+  };
+
+  const handleCriarDesafio = async (e) => {
+    e.preventDefault();
+    try {
+      await desafioService.criarDesafio(formData);
+      alert('Desafio criado com sucesso! 🏆');
+      setMostrarFormulario(false);
+      setFormData({
+        titulo: '',
+        descricao: '',
+        meta: '',
+        dataInicio: '',
+        dataFim: '',
+      });
+      await carregarDesafios();
+    } catch (error) {
+      console.error('Erro ao criar desafio:', error);
+      alert('Erro ao criar desafio');
     }
   };
 
@@ -59,6 +92,104 @@ const Desafios = () => {
       <Header title="Desafios" />
 
       <main className="pt-20 px-4 max-w-md mx-auto">
+        {/* Botão para criar desafio (apenas PERSONAL) */}
+        {user?.tipo === 'PERSONAL' && (
+          <button
+            onClick={() => setMostrarFormulario((prev) => !prev)}
+            className="btn-primary mb-4 w-full"
+          >
+            {mostrarFormulario ? '✕ Cancelar' : '+ Criar Desafio'}
+          </button>
+        )}
+
+        {/* Formulário de criação de desafio */}
+        {user?.tipo === 'PERSONAL' && mostrarFormulario && (
+          <div className="card mb-6">
+            <h3 className="text-lg font-bold text-dark mb-4">Novo Desafio</h3>
+
+            <form onSubmit={handleCriarDesafio} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Título *
+                </label>
+                <input
+                  type="text"
+                  className="input-field"
+                  value={formData.titulo}
+                  onChange={(e) =>
+                    setFormData({ ...formData, titulo: e.target.value })
+                  }
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Descrição
+                </label>
+                <textarea
+                  className="input-field resize-none"
+                  rows={2}
+                  value={formData.descricao}
+                  onChange={(e) =>
+                    setFormData({ ...formData, descricao: e.target.value })
+                  }
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Meta (ex: "Treinar 3x por semana") *
+                </label>
+                <input
+                  type="text"
+                  className="input-field"
+                  value={formData.meta}
+                  onChange={(e) =>
+                    setFormData({ ...formData, meta: e.target.value })
+                  }
+                  required
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Início *
+                  </label>
+                  <input
+                    type="datetime-local"
+                    className="input-field"
+                    value={formData.dataInicio}
+                    onChange={(e) =>
+                      setFormData({ ...formData, dataInicio: e.target.value })
+                    }
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Fim *
+                  </label>
+                  <input
+                    type="datetime-local"
+                    className="input-field"
+                    value={formData.dataFim}
+                    onChange={(e) =>
+                      setFormData({ ...formData, dataFim: e.target.value })
+                    }
+                    required
+                  />
+                </div>
+              </div>
+
+              <button type="submit" className="btn-primary w-full">
+                Salvar Desafio
+              </button>
+            </form>
+          </div>
+        )}
+
         {/* Abas */}
         <div className="flex gap-2 mb-6">
           <button
