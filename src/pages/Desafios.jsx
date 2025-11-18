@@ -6,7 +6,7 @@ import { desafioService } from '../services/api';
 
 /**
  * Página de Desafios
- * Lista desafios, permite participar e criar novos (Aluno ou Personal)
+ * Lista desafios, permite participar, criar, excluir e concluir
  */
 const Desafios = () => {
   const [desafios, setDesafios] = useState([]);
@@ -113,15 +113,17 @@ const Desafios = () => {
     return meusDesafios.some((d) => d.id === desafioId);
   };
 
-  // 🔥 AGORA COM 3 ABAS: TODOS / MEUS / CONCLUÍDOS
-  let desafiosExibidos = desafios;
+  // 🔥 FILTRO DAS ABAS
+  let desafiosExibidos = [];
 
-  if (abaSelecionada === 'meus') {
-    desafiosExibidos = meusDesafios;
+  if (abaSelecionada === 'todos') {
+    desafiosExibidos = desafios.filter((d) => d.status !== 'CONCLUIDO');
+  } 
+  else if (abaSelecionada === 'meus') {
+    desafiosExibidos = meusDesafios.filter((d) => d.status !== 'CONCLUIDO');
   }
-
-  if (abaSelecionada === 'concluidos') {
-    desafiosExibidos = desafios.filter((d) => d.status === 'CONCLUIDO');
+  else if (abaSelecionada === 'concluidos') {
+    desafiosExibidos = meusDesafios.filter((d) => d.status === 'CONCLUIDO');
   }
 
   return (
@@ -241,6 +243,7 @@ const Desafios = () => {
 
         {/* Abas */}
         <div className="flex gap-2 mb-6">
+          
           <button
             onClick={() => setAbaSelecionada('todos')}
             className={`flex-1 py-3 rounded-lg font-semibold transition-colors ${
