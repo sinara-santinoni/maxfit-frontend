@@ -52,7 +52,8 @@ const HomeAluno = () => {
       title: 'Meu Progresso',
       icon: '📊',
       description: 'Acompanhe sua evolução',
-      path: '/meu-progresso',   // ✅ CORRIGIDO
+        path: '/progresso',   // <-- CORRETO
+
       color: 'bg-indigo-500',
     },
   ];
