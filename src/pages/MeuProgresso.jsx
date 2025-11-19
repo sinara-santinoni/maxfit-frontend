@@ -39,7 +39,7 @@ const MeuProgresso = () => {
   // ========================
   const carregarProgressoTreinos = async () => {
     try {
-      const dash = await treinoService.dashboard();
+      const dash = await treinoService.dashboard(user.id);
       setProgressoTreinos(dash);
     } catch (err) {
       console.error("Erro ao carregar progresso de treinos:", err);
@@ -158,11 +158,16 @@ const MeuProgresso = () => {
         <button
           onClick={async () => {
             try {
-              await treinoService.registrarTreino();
+              await treinoService.registrarTreino({
+                alunoId: user.id,
+                nomeTreino: "Treino do dia",
+                concluido: true
+              });
+
               await carregarProgressoTreinos();
               alert("Treino registrado com sucesso! ✅");
             } catch (e) {
-              console.error(e);
+              console.error("Erro ao registrar treino:", e);
               alert("Erro ao registrar treino.");
             }
           }}

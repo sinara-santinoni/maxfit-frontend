@@ -82,21 +82,30 @@ export const treinoService = {
 
   criarTreino: async (dados) => (await api.post('/treinos', dados)).data,
 
-  // 🆕 REGISTRAR TREINO DO DIA (para progresso)
-  registrarTreino: async () => {
-    const user = JSON.parse(localStorage.getItem('user'));
-    const payload = {
-      alunoId: user.id,
-      nomeTreino: 'Treino do dia',
-      concluido: true,
-    };
-    return (await api.post('/treinos', payload)).data;
+  // 🆕 REGISTRAR TREINO DO DIA (registro de frequência do aluno)
+  registrarTreino: async (data) => {
+    // se não vier data, monta usando o usuário logado
+    if (!data) {
+      const user = JSON.parse(localStorage.getItem('user'));
+      data = {
+        alunoId: user?.id,
+        nomeTreino: 'Treino do dia',
+        concluido: true,
+      };
+    }
+    // endpoint correto do RegistroTreinoController
+    const resp = await api.post('/treinos/registro', data);
+    return resp.data; // ApiResponse<Void>
   },
 
   // 🆕 DASHBOARD DE PROGRESSO (semana / mês / streak / últimos treinos)
-  dashboard: async () => {
-    const user = JSON.parse(localStorage.getItem('user'));
-    const resp = await api.get(`/treinos/dashboard/${user.id}`);
+  dashboard: async (alunoId) => {
+    let id = alunoId;
+    if (!id) {
+      const user = JSON.parse(localStorage.getItem('user'));
+      id = user?.id;
+    }
+    const resp = await api.get(`/treinos/dashboard/${id}`);
     return resp.data.data; // ApiResponse<DashboardTreinoResponse>
   },
 };
