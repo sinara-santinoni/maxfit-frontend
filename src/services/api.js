@@ -81,6 +81,34 @@ export const treinoService = {
   buscarTreino: async (id) => (await api.get(`/treinos/${id}`)).data,
 
   criarTreino: async (dados) => (await api.post('/treinos', dados)).data,
+
+  // 🆕 REGISTRAR TREINO DO DIA (para progresso)
+  registrarTreino: async () => {
+    const user = JSON.parse(localStorage.getItem('user'));
+    const payload = {
+      alunoId: user.id,
+      nomeTreino: 'Treino do dia',
+      concluido: true,
+    };
+    return (await api.post('/treinos', payload)).data;
+  },
+
+  // 🆕 DASHBOARD DE PROGRESSO (semana / mês / streak / últimos treinos)
+  dashboard: async () => {
+    const user = JSON.parse(localStorage.getItem('user'));
+    const resp = await api.get(`/treinos/dashboard/${user.id}`);
+    return resp.data.data; // ApiResponse<DashboardTreinoResponse>
+  },
+};
+
+// ========== PROGRESSO FÍSICO ==========
+export const progressoService = {
+  listarProgresso: async () => {
+    const user = JSON.parse(localStorage.getItem('user'));
+    const resp = await api.get(`/progresso/${user.id}`);
+    // ApiResponse<List<ProgressoResponse>>
+    return resp.data.data || [];
+  },
 };
 
 // ========== DIÁRIO ==========
@@ -111,13 +139,13 @@ export const desafioService = {
     return (await api.get(`/desafios/${user.id}`)).data;
   },
 
-  // 🆕 LISTAR PARTICIPANTES (NOVO - NÃO MEXE NOS ANTIGOS)
+  // 🆕 LISTAR PARTICIPANTES
   listarParticipantes: async (desafioId) => {
     const response = await api.get(`/desafios/${desafioId}/participantes`);
     return response.data.data || [];
   },
 
-  // PARTICIPAR (MANTIDO COMO ESTÁ)
+  // PARTICIPAR
   participar: async (desafioId) => {
     const user = JSON.parse(localStorage.getItem('user'));
     return (
@@ -128,7 +156,7 @@ export const desafioService = {
     ).data;
   },
 
-  // 🆕 SAIR DO DESAFIO (NOVO - NÃO MEXE NOS ANTIGOS)
+  // 🆕 SAIR DO DESAFIO
   sair: async (desafioId) => {
     const user = JSON.parse(localStorage.getItem('user'));
     return (
@@ -136,7 +164,7 @@ export const desafioService = {
     ).data;
   },
 
-  // CRIAR (MANTIDO COMO ESTÁ)
+  // CRIAR
   criarDesafio: async (dados) => {
     const user = JSON.parse(localStorage.getItem('user'));
 
@@ -152,7 +180,7 @@ export const desafioService = {
     return (await api.post('/desafios', payload)).data;
   },
 
-  // CONCLUIR (MANTIDO COMO ESTÁ)
+  // CONCLUIR
   concluirDesafio: async (desafioId) => {
     const user = JSON.parse(localStorage.getItem('user'));
 
@@ -161,12 +189,12 @@ export const desafioService = {
     ).data;
   },
 
-  // EXCLUIR (MANTIDO COMO ESTÁ)
+  // EXCLUIR
   excluirDesafio: async (desafioId) =>
     (await api.delete(`/desafios/${desafioId}`)).data,
 };
 
-// ========== COMUNIDADE (ATUALIZADO COM COMENTÁRIOS E CURTIDAS) ==========
+// ========== COMUNIDADE ==========
 export const comunidadeService = {
   // Listar postagens
   listarPostagens: async () => {
@@ -187,16 +215,16 @@ export const comunidadeService = {
     return resp.data.data;
   },
   
-  // 🆕 Curtir/Descurtir postagem
+  // Curtir/Descurtir postagem
   curtir: async (postagemId) => {
     const user = JSON.parse(localStorage.getItem('user'));
     const resp = await api.post(`/comunidade/${postagemId}/curtir`, null, {
       params: { usuarioId: user?.id }
     });
-    return resp.data.data; // retorna true se curtiu, false se descurtiu
+    return resp.data.data; // true se curtiu, false se descurtiu
   },
   
-  // 🆕 Comentar em postagem
+  // Comentar em postagem
   comentar: async (postagemId, texto) => {
     const user = JSON.parse(localStorage.getItem('user'));
     const resp = await api.post(`/comunidade/${postagemId}/comentarios`, {
@@ -206,7 +234,7 @@ export const comunidadeService = {
     return resp.data.data;
   },
   
-  // 🆕 Listar comentários de uma postagem
+  // Listar comentários de uma postagem
   listarComentarios: async (postagemId) => {
     const resp = await api.get(`/comunidade/${postagemId}/comentarios`);
     return resp.data;
