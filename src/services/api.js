@@ -1,6 +1,8 @@
 import axios from 'axios';
 
-// ✅ SUA API DO RENDER
+// ============================================
+//  API BASE (Render)
+// ============================================
 const API_BASE_URL = 'https://max-fit-api-4bkb.onrender.com/api';
 
 const api = axios.create({
@@ -10,7 +12,9 @@ const api = axios.create({
   },
 });
 
-// Interceptor para token
+// ============================================
+//  INTERCEPTOR — Token no Header
+// ============================================
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('token');
@@ -20,7 +24,9 @@ api.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-// Interceptor para erros
+// ============================================
+//  INTERCEPTOR — Sessão expirada
+// ============================================
 api.interceptors.response.use(
   (response) => response,
   (error) => {
@@ -33,8 +39,11 @@ api.interceptors.response.use(
   }
 );
 
-// ========== AUTENTICAÇÃO ==========
+// ============================================
+//  AUTENTICAÇÃO
+// ============================================
 export const authService = {
+  // LOGIN
   login: async (email, senha) => {
     const response = await api.post('/login', { email, senha });
     const data = response.data;
@@ -45,33 +54,40 @@ export const authService = {
         id: data.id,
         nome: data.nome,
         email: data.email,
-        tipo: data.tipo
-      }
+        tipo: data.tipo,
+        cidade: data.cidade, // 👈 vindo do back
+      },
     };
   },
 
+  // CADASTRAR ALUNO
   cadastrarAluno: async (dados) => {
     const payload = {
       nome: dados.nome,
       email: dados.email,
       senha: dados.senha,
-      tipo: 'ALUNO'
+      tipo: 'ALUNO',
+      cidade: dados.cidade, // 👈 enviado pro back
     };
     return (await api.post('/cadastro', payload)).data;
   },
 
+  // CADASTRAR PERSONAL
   cadastrarPersonal: async (dados) => {
     const payload = {
       nome: dados.nome,
       email: dados.email,
       senha: dados.senha,
-      tipo: 'PERSONAL'
+      tipo: 'PERSONAL',
+      cidade: dados.cidade, // 👈 enviado pro back
     };
     return (await api.post('/cadastro', payload)).data;
   },
 };
 
-// ========== TREINOS ==========
+// ============================================
+//  TREINOS
+// ============================================
 export const treinoService = {
   listarTreinosAluno: async (alunoId) => {
     if (!alunoId) alunoId = JSON.parse(localStorage.getItem('user'))?.id;
@@ -82,9 +98,8 @@ export const treinoService = {
 
   criarTreino: async (dados) => (await api.post('/treinos', dados)).data,
 
-  // 🆕 REGISTRAR TREINO DO DIA (registro de frequência do aluno)
+  // Registro de frequência (treino do dia)
   registrarTreino: async (data) => {
-    // se não vier data, monta usando o usuário logado
     if (!data) {
       const user = JSON.parse(localStorage.getItem('user'));
       data = {
@@ -93,79 +108,75 @@ export const treinoService = {
         concluido: true,
       };
     }
-    // endpoint correto do RegistroTreinoController
-    const resp = await api.post('/treinos/registro', data);
-    return resp.data; // ApiResponse<Void>
+    return (await api.post('/treinos/registro', data)).data;
   },
 
-  // 🆕 DASHBOARD DE PROGRESSO (semana / mês / streak / últimos treinos)
+  // Dashboard (semana / mês / streak / últimos treinos)
   dashboard: async (alunoId) => {
     let id = alunoId;
-    if (!id) {
-      const user = JSON.parse(localStorage.getItem('user'));
-      id = user?.id;
-    }
+    if (!id) id = JSON.parse(localStorage.getItem('user'))?.id;
     const resp = await api.get(`/treinos/dashboard/${id}`);
-    return resp.data.data; // ApiResponse<DashboardTreinoResponse>
+    return resp.data.data;
   },
 };
 
-// ========== PROGRESSO FÍSICO ==========
+// ============================================
+//  PROGRESSO FÍSICO
+// ============================================
 export const progressoService = {
   listarProgresso: async () => {
     const user = JSON.parse(localStorage.getItem('user'));
     const resp = await api.get(`/progresso/${user.id}`);
-    // ApiResponse<List<ProgressoResponse>>
     return resp.data.data || [];
   },
 };
 
-// ========== DIÁRIO ==========
+// ============================================
+//  DIÁRIO
+// ============================================
 export const diarioService = {
   criarRegistro: async (dados) => {
     const user = JSON.parse(localStorage.getItem('user'));
     const payload = { ...dados, alunoId: user.id };
-    return (await api.post('/diarios', payload)).data.data;
+    const resp = await api.post('/diarios', payload);
+    return resp.data.data;
   },
 
   listarRegistros: async () => {
     const user = JSON.parse(localStorage.getItem('user'));
     const response = await api.get('/diarios', {
-      params: { alunoId: user.id }
+      params: { alunoId: user.id },
     });
     return response.data.data || [];
   },
 };
 
-// ========== DESAFIOS ==========
+// ============================================
+//  DESAFIOS
+// ============================================
 export const desafioService = {
-  // LISTAR TODOS
   listarDesafios: async () => (await api.get('/desafios')).data,
 
-  // LISTAR DO ALUNO
   meusDesafios: async () => {
     const user = JSON.parse(localStorage.getItem('user'));
     return (await api.get(`/desafios/${user.id}`)).data;
   },
 
-  // 🆕 LISTAR PARTICIPANTES
-  listarParticipantes: async (desafioId) => {
-    const response = await api.get(`/desafios/${desafioId}/participantes`);
-    return response.data.data || [];
+  listarParticipantes: async (id) => {
+    const resp = await api.get(`/desafios/${id}/participantes`);
+    return resp.data.data || [];
   },
 
-  // PARTICIPAR
   participar: async (desafioId) => {
     const user = JSON.parse(localStorage.getItem('user'));
     return (
       await api.post(`/desafios/${desafioId}/participar`, {
         alunoId: user.id,
-        progressoAtual: 0
+        progressoAtual: 0,
       })
     ).data;
   },
 
-  // 🆕 SAIR DO DESAFIO
   sair: async (desafioId) => {
     const user = JSON.parse(localStorage.getItem('user'));
     return (
@@ -173,48 +184,41 @@ export const desafioService = {
     ).data;
   },
 
-  // CRIAR
   criarDesafio: async (dados) => {
     const user = JSON.parse(localStorage.getItem('user'));
 
-    const payload = {
-      alunoId: user.id,
-      titulo: dados.titulo,
-      descricao: dados.descricao,
-      meta: dados.meta,
-      dataInicio: new Date(dados.dataInicio).toISOString(),
-      dataFim: new Date(dados.dataFim).toISOString(),
-    };
-
-    return (await api.post('/desafios', payload)).data;
-  },
-
-  // CONCLUIR
-  concluirDesafio: async (desafioId) => {
-    const user = JSON.parse(localStorage.getItem('user'));
-
     return (
-      await api.post(`/desafios/${desafioId}/concluir?alunoId=${user.id}`)
+      await api.post('/desafios', {
+        alunoId: user.id,
+        titulo: dados.titulo,
+        descricao: dados.descricao,
+        meta: dados.meta,
+        dataInicio: new Date(dados.dataInicio).toISOString(),
+        dataFim: new Date(dados.dataFim).toISOString(),
+      })
     ).data;
   },
 
-  // EXCLUIR
-  excluirDesafio: async (desafioId) =>
-    (await api.delete(`/desafios/${desafioId}`)).data,
+  concluirDesafio: async (id) => {
+    const user = JSON.parse(localStorage.getItem('user'));
+    return (await api.post(`/desafios/${id}/concluir?alunoId=${user.id}`)).data;
+  },
+
+  excluirDesafio: async (id) => (await api.delete(`/desafios/${id}`)).data,
 };
 
-// ========== COMUNIDADE ==========
+// ============================================
+//  COMUNIDADE
+// ============================================
 export const comunidadeService = {
-  // Listar postagens
   listarPostagens: async () => {
     const user = JSON.parse(localStorage.getItem('user'));
     const resp = await api.get('/comunidade', {
-      params: { usuarioId: user?.id }
+      params: { usuarioId: user?.id },
     });
     return resp.data;
   },
-  
-  // Criar postagem
+
   criarPostagem: async (texto) => {
     const user = JSON.parse(localStorage.getItem('user'));
     const resp = await api.post('/comunidade', {
@@ -223,17 +227,17 @@ export const comunidadeService = {
     });
     return resp.data.data;
   },
-  
-  // Curtir/Descurtir postagem
+
   curtir: async (postagemId) => {
     const user = JSON.parse(localStorage.getItem('user'));
-    const resp = await api.post(`/comunidade/${postagemId}/curtir`, null, {
-      params: { usuarioId: user?.id }
-    });
-    return resp.data.data; // true se curtiu, false se descurtiu
+    const resp = await api.post(
+      `/comunidade/${postagemId}/curtir`,
+      null,
+      { params: { usuarioId: user?.id } }
+    );
+    return resp.data.data;
   },
-  
-  // Comentar em postagem
+
   comentar: async (postagemId, texto) => {
     const user = JSON.parse(localStorage.getItem('user'));
     const resp = await api.post(`/comunidade/${postagemId}/comentarios`, {
@@ -242,34 +246,32 @@ export const comunidadeService = {
     });
     return resp.data.data;
   },
-  
-  // Listar comentários de uma postagem
+
   listarComentarios: async (postagemId) => {
     const resp = await api.get(`/comunidade/${postagemId}/comentarios`);
     return resp.data;
   },
 };
 
-// ========== SUPORTE ==========
+// ============================================
+//  SUPORTE (BUSCA PROFISSIONAIS POR CIDADE)
+// ============================================
 export const suporteService = {
-  listarPsicologos: async () => [
-    {
-      id: 1,
-      nome: 'Em breve',
-      especialidade: 'Aguarde atualização',
-      telefone: '',
-      email: ''
-    }
-  ],
-  listarNutricionistas: async () => [
-    {
-      id: 1,
-      nome: 'Em breve',
-      especialidade: 'Aguarde atualização',
-      telefone: '',
-      email: ''
-    }
-  ],
+  listarPsicologos: async () => {
+    const user = JSON.parse(localStorage.getItem('user'));
+    const resp = await api.get('/suporte/psicologos', {
+      params: { cidade: user?.cidade },
+    });
+    return resp.data.data || [];
+  },
+
+  listarNutricionistas: async () => {
+    const user = JSON.parse(localStorage.getItem('user'));
+    const resp = await api.get('/suporte/nutricionistas', {
+      params: { cidade: user?.cidade },
+    });
+    return resp.data.data || [];
+  },
 };
 
 export default api;

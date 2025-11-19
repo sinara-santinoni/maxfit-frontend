@@ -2,18 +2,13 @@ import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
-/**
- * Página de Cadastro
- * Passo 1: Escolher tipo (Aluno ou Personal)
- * Passo 2: Preencher dados e criar conta
- */
 const Cadastro = () => {
   const navigate = useNavigate();
   const { cadastrar } = useAuth();
   
-  const [passo, setPasso] = useState(1); // 1 = escolher tipo, 2 = formulário
+  const [passo, setPasso] = useState(1);
   const [tipo, setTipo] = useState('');
-  
+
   const [formData, setFormData] = useState({
     nome: '',
     email: '',
@@ -21,11 +16,11 @@ const Cadastro = () => {
     confirmarSenha: '',
     telefone: '',
     dataNascimento: '',
-    // Campos específicos para aluno
+    cidade: '',              // 👈 NOVO CAMPO
+
     peso: '',
     altura: '',
     objetivo: '',
-    // Campos específicos para personal
     cref: '',
     especialidade: '',
   });
@@ -50,8 +45,7 @@ const Cadastro = () => {
     setError('');
     setLoading(true);
 
-    // Validações
-    if (!formData.nome || !formData.email || !formData.senha) {
+    if (!formData.nome || !formData.email || !formData.senha || !formData.cidade) {
       setError('Preencha todos os campos obrigatórios');
       setLoading(false);
       return;
@@ -69,16 +63,16 @@ const Cadastro = () => {
       return;
     }
 
-    // Preparar dados para enviar
+    // 👇 MONTA O OBJETO A SER ENVIADO AO BACKEND
     const dadosCadastro = {
       nome: formData.nome,
       email: formData.email,
       senha: formData.senha,
+      cidade: formData.cidade,        // 👈 ENVIA A CIDADE
       telefone: formData.telefone,
       dataNascimento: formData.dataNascimento,
     };
 
-    // Adicionar campos específicos
     if (tipo === 'ALUNO') {
       dadosCadastro.peso = parseFloat(formData.peso);
       dadosCadastro.altura = parseFloat(formData.altura);
@@ -88,7 +82,6 @@ const Cadastro = () => {
       dadosCadastro.especialidade = formData.especialidade;
     }
 
-    // Tentar cadastrar
     const result = await cadastrar(tipo, dadosCadastro);
     
     if (result.success) {
@@ -104,14 +97,13 @@ const Cadastro = () => {
   return (
     <div className="min-h-screen bg-gradient-to-b from-primary to-secondary flex items-center justify-center px-4 py-8">
       <div className="w-full max-w-md">
-        {/* Logo */}
+
         <div className="text-center mb-6">
           <h1 className="text-4xl font-bold text-white mb-2">💪 MaxFit</h1>
         </div>
 
-        {/* Card de Cadastro */}
         <div className="bg-white rounded-2xl shadow-xl p-8">
-          {/* Passo 1: Escolher tipo */}
+
           {passo === 1 && (
             <>
               <h2 className="text-2xl font-bold text-dark mb-6 text-center">
@@ -158,7 +150,6 @@ const Cadastro = () => {
             </>
           )}
 
-          {/* Passo 2: Formulário */}
           {passo === 2 && (
             <>
               <button
@@ -179,7 +170,8 @@ const Cadastro = () => {
               )}
 
               <form onSubmit={handleSubmit} className="space-y-4">
-                {/* Campos comuns */}
+
+                {/* Nome */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Nome completo *
@@ -190,10 +182,10 @@ const Cadastro = () => {
                     value={formData.nome}
                     onChange={handleChange}
                     className="input-field"
-                    required
                   />
                 </div>
 
+                {/* Email */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Email *
@@ -204,10 +196,26 @@ const Cadastro = () => {
                     value={formData.email}
                     onChange={handleChange}
                     className="input-field"
+                  />
+                </div>
+
+                {/* Cidade */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Cidade *
+                  </label>
+                  <input
+                    type="text"
+                    name="cidade"
+                    value={formData.cidade}
+                    onChange={handleChange}
+                    placeholder="Ex: Florianópolis"
+                    className="input-field"
                     required
                   />
                 </div>
 
+                {/* Senha */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Senha *
@@ -218,10 +226,10 @@ const Cadastro = () => {
                     value={formData.senha}
                     onChange={handleChange}
                     className="input-field"
-                    required
                   />
                 </div>
 
+                {/* Confirmar senha */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Confirmar senha *
@@ -232,10 +240,10 @@ const Cadastro = () => {
                     value={formData.confirmarSenha}
                     onChange={handleChange}
                     className="input-field"
-                    required
                   />
                 </div>
 
+                {/* Telefone */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Telefone
@@ -245,11 +253,11 @@ const Cadastro = () => {
                     name="telefone"
                     value={formData.telefone}
                     onChange={handleChange}
-                    placeholder="(00) 00000-0000"
                     className="input-field"
                   />
                 </div>
 
+                {/* Data nascimento */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Data de nascimento
@@ -263,7 +271,7 @@ const Cadastro = () => {
                   />
                 </div>
 
-                {/* Campos específicos para ALUNO */}
+                {/* ALUNO */}
                 {tipo === 'ALUNO' && (
                   <>
                     <div className="grid grid-cols-2 gap-4">
@@ -273,24 +281,22 @@ const Cadastro = () => {
                         </label>
                         <input
                           type="number"
-                          step="0.1"
                           name="peso"
                           value={formData.peso}
                           onChange={handleChange}
                           className="input-field"
                         />
                       </div>
+
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">
                           Altura (m)
                         </label>
                         <input
                           type="number"
-                          step="0.01"
                           name="altura"
                           value={formData.altura}
                           onChange={handleChange}
-                          placeholder="Ex: 1.75"
                           className="input-field"
                         />
                       </div>
@@ -316,7 +322,7 @@ const Cadastro = () => {
                   </>
                 )}
 
-                {/* Campos específicos para PERSONAL */}
+                {/* PERSONAL */}
                 {tipo === 'PERSONAL' && (
                   <>
                     <div>
@@ -328,7 +334,6 @@ const Cadastro = () => {
                         name="cref"
                         value={formData.cref}
                         onChange={handleChange}
-                        placeholder="000000-G/XX"
                         className="input-field"
                       />
                     </div>
@@ -342,7 +347,6 @@ const Cadastro = () => {
                         name="especialidade"
                         value={formData.especialidade}
                         onChange={handleChange}
-                        placeholder="Ex: Musculação, Funcional, Crossfit..."
                         className="input-field"
                       />
                     </div>
@@ -360,6 +364,7 @@ const Cadastro = () => {
             </>
           )}
         </div>
+
       </div>
     </div>
   );

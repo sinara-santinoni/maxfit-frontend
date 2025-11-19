@@ -4,7 +4,7 @@ import { authService } from '../services/api';
 // Criar o contexto
 const AuthContext = createContext({});
 
-// Hook personalizado para usar o contexto
+// Hook personalizado
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) {
@@ -13,85 +13,75 @@ export const useAuth = () => {
   return context;
 };
 
-// Provider do contexto
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // Ao carregar a aplicação, verificar se há usuário salvo no localStorage
+  // Carregar sessão salva
   useEffect(() => {
     const storedUser = localStorage.getItem('user');
     const storedToken = localStorage.getItem('token');
-    
+
     if (storedUser && storedToken) {
       setUser(JSON.parse(storedUser));
     }
     setLoading(false);
   }, []);
 
-  // Função de login
+  // LOGIN ---------------------------------------------------------
   const login = async (email, senha) => {
     try {
-      // Chamar API de login
       const data = await authService.login(email, senha);
-      
-      // Salvar token e usuário
+
       localStorage.setItem('token', data.token);
       localStorage.setItem('user', JSON.stringify(data.usuario));
-      
+
       setUser(data.usuario);
       return { success: true };
     } catch (error) {
       console.error('Erro no login:', error);
-      return { 
-        success: false, 
-        message: error.response?.data?.message || 'Erro ao fazer login' 
+      return {
+        success: false,
+        message: error.response?.data?.mensagem || 'Erro ao fazer login',
       };
     }
   };
 
-  // Função de logout
+  // LOGOUT ---------------------------------------------------------
   const logout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
     setUser(null);
   };
 
-  // Função de cadastro
+  // CADASTRO ------------------------------------------------------
   const cadastrar = async (tipo, dados) => {
     try {
-      // Chamar serviço de cadastro conforme o tipo
+      // Aqui dados já contém a cidade — só chamamos a API certa
       if (tipo === 'ALUNO') {
         await authService.cadastrarAluno(dados);
       } else {
         await authService.cadastrarPersonal(dados);
       }
-      
+
       return { success: true };
     } catch (error) {
       console.error('Erro no cadastro:', error);
-      return { 
-        success: false, 
-        message: error.response?.data?.message || 'Erro ao cadastrar' 
+      return {
+        success: false,
+        message: error.response?.data?.mensagem || 'Erro ao cadastrar',
       };
     }
   };
 
-  // Verificar se o usuário está autenticado
-  const isAuthenticated = () => {
-    return !!user;
-  };
+  // Regras de perfil ---------------------------------------------
+  const isAuthenticated = () => !!user;
 
-  // Verificar se o usuário é aluno
-  const isAluno = () => {
-    return user?.tipo === 'ALUNO';
-  };
+  const isAluno = () => user?.tipo === 'ALUNO';
 
-  // Verificar se o usuário é personal
-  const isPersonal = () => {
-    return user?.tipo === 'PERSONAL';
-  };
+  const isPersonal = () => user?.tipo === 'PERSONAL';
 
+  // Provider --------------------------------------------------------
   return (
     <AuthContext.Provider
       value={{
