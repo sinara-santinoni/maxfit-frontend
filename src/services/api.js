@@ -70,6 +70,79 @@ export const authService = {
   },
 };
 
+// ========== SERVIÇOS DE TREINO ==========
+export const treinoService = {
+  /**
+   * Lista todos os treinos do aluno
+   */
+  listarTreinos: async () => {
+    try {
+      const response = await api.get("/treinos");
+      return response.data;
+    } catch (error) {
+      console.error("Erro ao listar treinos:", error);
+      throw error;
+    }
+  },
+
+  /**
+   * Busca um treino específico por ID
+   * @param {number} id - ID do treino
+   */
+  buscarTreino: async (id) => {
+    try {
+      const response = await api.get(`/treinos/${id}`);
+      return response.data;
+    } catch (error) {
+      console.error("Erro ao buscar treino:", error);
+      throw error;
+    }
+  },
+
+  /**
+   * Cria um novo treino
+   * @param {Object} dados - Dados do treino
+   */
+  criarTreino: async (dados) => {
+    try {
+      const response = await api.post("/treinos", dados);
+      return response.data;
+    } catch (error) {
+      console.error("Erro ao criar treino:", error);
+      throw error;
+    }
+  },
+
+  /**
+   * Atualiza um treino existente
+   * @param {number} id - ID do treino
+   * @param {Object} dados - Dados atualizados
+   */
+  atualizarTreino: async (id, dados) => {
+    try {
+      const response = await api.put(`/treinos/${id}`, dados);
+      return response.data;
+    } catch (error) {
+      console.error("Erro ao atualizar treino:", error);
+      throw error;
+    }
+  },
+
+  /**
+   * Deleta um treino
+   * @param {number} id - ID do treino
+   */
+  deletarTreino: async (id) => {
+    try {
+      const response = await api.delete(`/treinos/${id}`);
+      return response.data;
+    } catch (error) {
+      console.error("Erro ao deletar treino:", error);
+      throw error;
+    }
+  },
+};
+
 // ========== SERVIÇOS DE SUPORTE ==========
 export const suporteService = {
   /**
