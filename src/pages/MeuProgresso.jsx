@@ -16,18 +16,19 @@ const MeuProgresso = () => {
   const [loadingTreinos, setLoadingTreinos] = useState(true);
 
   // ========================
-  // 1. Buscar progresso FÍSICO (personal)
+  // 1. Buscar progresso FÍSICO (corrigido)
   // ========================
   const carregarProgressoFisico = async () => {
     try {
-      const lista = await progressoService.listarProgresso();
+      const lista = await progressoService.listarProgresso(user.id);
+
       if (lista && lista.length > 0) {
-        setProgressoFisico(lista[0]); // registro mais recente
+        setProgressoFisico(lista[0]); // mais recente
       } else {
         setProgressoFisico(null);
       }
-    } catch (err) {
-      console.error("Erro ao buscar progresso físico:", err);
+    } catch (error) {
+      console.error("Erro ao buscar progresso físico:", error);
       setProgressoFisico(null);
     } finally {
       setLoadingFisico(false);
@@ -35,14 +36,14 @@ const MeuProgresso = () => {
   };
 
   // ========================
-  // 2. Buscar progresso TREINOS (frequência/aluno)
+  // 2. Buscar progresso TREINOS (corrigido)
   // ========================
   const carregarProgressoTreinos = async () => {
     try {
       const dash = await treinoService.dashboard(user.id);
       setProgressoTreinos(dash);
-    } catch (err) {
-      console.error("Erro ao carregar progresso de treinos:", err);
+    } catch (error) {
+      console.error("Erro ao carregar progresso de treinos:", error);
       setProgressoTreinos(null);
     } finally {
       setLoadingTreinos(false);
@@ -69,7 +70,6 @@ const MeuProgresso = () => {
       <Header title="Meu Progresso" />
 
       <main className="pt-20 px-4 max-w-md mx-auto space-y-5">
-
         {/* ==========================
             BLOCO 1 — PROGRESSO FÍSICO
         ========================== */}
@@ -82,25 +82,26 @@ const MeuProgresso = () => {
               Nenhum progresso físico registrado ainda.
             </p>
             <p className="text-sm text-gray-500 mt-1">
-              Seu personal pode registrar seu peso, medidas e composição corporal.
+              Seu personal pode registrar seu peso, medidas e composição
+              corporal.
             </p>
           </div>
         )}
 
         {progressoFisico && (
           <>
-            {/* Peso */}
             <div className="card">
               <h2 className="text-lg font-bold text-dark">Peso Atual</h2>
               <p className="text-3xl font-bold text-primary">
                 {progressoFisico.peso} kg
               </p>
               <p className="text-sm text-gray-600 mt-2">
-                {new Date(progressoFisico.dataRegistro).toLocaleDateString("pt-BR")}
+                {new Date(progressoFisico.dataRegistro).toLocaleDateString(
+                  "pt-BR"
+                )}
               </p>
             </div>
 
-            {/* IMC */}
             <div className="card">
               <h2 className="text-lg font-bold text-dark">IMC</h2>
               <p className="text-2xl font-bold text-indigo-600">
@@ -111,20 +112,22 @@ const MeuProgresso = () => {
               </p>
             </div>
 
-            {/* Medidas */}
             <div className="card">
-              <h2 className="text-lg font-bold text-dark mb-2">Medidas Corporais</h2>
+              <h2 className="text-lg font-bold text-dark mb-2">
+                Medidas Corporais
+              </h2>
               <ul className="text-sm text-gray-700 space-y-1">
                 <li>Braços: {progressoFisico.circunferenciaBracos} cm</li>
                 <li>Peito: {progressoFisico.circunferenciaPeito} cm</li>
                 <li>Cintura: {progressoFisico.circunferenciaCintura} cm</li>
                 <li>Quadril: {progressoFisico.circunferenciaQuadril} cm</li>
                 <li>Coxas: {progressoFisico.circunferenciaCoxas} cm</li>
-                <li>Panturrilhas: {progressoFisico.circunferenciaPanturrilhas} cm</li>
+                <li>
+                  Panturrilhas: {progressoFisico.circunferenciaPanturrilhas} cm
+                </li>
               </ul>
             </div>
 
-            {/* Composição corporal */}
             <div className="card">
               <h2 className="text-lg font-bold text-dark mb-2">
                 Composição Corporal
@@ -140,7 +143,9 @@ const MeuProgresso = () => {
 
             {progressoFisico.observacoes && (
               <div className="card">
-                <h2 className="text-lg font-bold text-dark mb-2">Observações</h2>
+                <h2 className="text-lg font-bold text-dark mb-2">
+                  Observações
+                </h2>
                 <p className="text-sm text-gray-700">
                   {progressoFisico.observacoes}
                 </p>
@@ -152,16 +157,17 @@ const MeuProgresso = () => {
         {/* ==========================
             BLOCO 2 — PROGRESSO DE TREINOS
         ========================== */}
-        <h1 className="text-xl font-bold text-dark mt-4">Progresso nos Treinos</h1>
+        <h1 className="text-xl font-bold text-dark mt-4">
+          Progresso nos Treinos
+        </h1>
 
-        {/* Botão para registrar treino do dia */}
         <button
           onClick={async () => {
             try {
               await treinoService.registrarTreino({
                 alunoId: user.id,
                 nomeTreino: "Treino do dia",
-                concluido: true
+                concluido: true,
               });
 
               await carregarProgressoTreinos();
@@ -190,7 +196,6 @@ const MeuProgresso = () => {
 
         {progressoTreinos && (
           <>
-            {/* Semana */}
             <div className="card">
               <h2 className="text-lg font-bold text-dark mb-2">
                 Resumo da Semana
@@ -198,8 +203,7 @@ const MeuProgresso = () => {
               <p className="text-sm text-gray-700 mb-2">
                 Você treinou{" "}
                 <strong>
-                  {progressoTreinos.treinosSemana}/
-                  {progressoTreinos.metaSemana}
+                  {progressoTreinos.treinosSemana}/{progressoTreinos.metaSemana}
                 </strong>{" "}
                 vezes essa semana.
               </p>
@@ -210,14 +214,17 @@ const MeuProgresso = () => {
                   style={{
                     width:
                       progressoTreinos.metaSemana > 0
-                        ? `${(progressoTreinos.treinosSemana / progressoTreinos.metaSemana) * 100}%`
+                        ? `${
+                            (progressoTreinos.treinosSemana /
+                              progressoTreinos.metaSemana) *
+                            100
+                          }%`
                         : "0%",
                   }}
                 ></div>
               </div>
             </div>
 
-            {/* Mês */}
             <div className="card">
               <h2 className="text-lg font-bold text-dark mb-2">
                 Resumo do Mês
@@ -227,14 +234,12 @@ const MeuProgresso = () => {
                 <strong>{progressoTreinos.treinosMes}</strong>
               </p>
               <p className="text-sm text-gray-700">
-                Meta do mês:{" "}
-                <strong>{progressoTreinos.metaMes}</strong>
+                Meta do mês: <strong>{progressoTreinos.metaMes}</strong>
               </p>
               <p className="text-sm text-dark font-semibold mt-2">
                 {progressoTreinos.metaMes > 0
                   ? Math.round(
-                      (progressoTreinos.treinosMes /
-                        progressoTreinos.metaMes) *
+                      (progressoTreinos.treinosMes / progressoTreinos.metaMes) *
                         100
                     )
                   : 0}
@@ -242,7 +247,6 @@ const MeuProgresso = () => {
               </p>
             </div>
 
-            {/* Streak */}
             <div className="card">
               <h2 className="text-lg font-bold text-dark mb-2">
                 Dias Seguidos Treinando
@@ -250,12 +254,8 @@ const MeuProgresso = () => {
               <p className="text-2xl font-bold text-green-600">
                 {progressoTreinos.streakDias} dias 🔥
               </p>
-              <p className="text-sm text-gray-600 mt-1">
-                Mantenha sua sequência para resultados melhores!
-              </p>
             </div>
 
-            {/* Últimos treinos */}
             <div className="card">
               <h2 className="text-lg font-bold text-dark mb-3">
                 Últimos Treinos
@@ -271,7 +271,9 @@ const MeuProgresso = () => {
                       <p className="text-gray-600">{t.nome}</p>
                     </div>
                     <span
-                      className={t.concluido ? "text-green-600" : "text-red-500"}
+                      className={
+                        t.concluido ? "text-green-600" : "text-red-500"
+                      }
                     >
                       {t.concluido ? "✅" : "❌"}
                     </span>

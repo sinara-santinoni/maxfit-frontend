@@ -5,10 +5,6 @@ import BottomNav from "../components/BottomNav";
 import { personalService } from "../services/api";
 import { useEffect, useState } from "react";
 
-/**
- * Página inicial do Personal Trainer
- * Exibe opções de gerenciamento de alunos e treinos
- */
 const HomePersonal = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -16,17 +12,15 @@ const HomePersonal = () => {
   const [totalAlunos, setTotalAlunos] = useState(0);
 
   useEffect(() => {
-    carregarResumo();
-  }, []);
+    if (user?.id) carregarResumo();
+  }, [user]);
 
   const carregarResumo = async () => {
     try {
-      if (!user?.id) return;
-
       const alunos = await personalService.listarAlunos(user.id);
-      setTotalAlunos(alunos.length);
+      setTotalAlunos(alunos?.length || 0);
     } catch (error) {
-      console.error("Erro ao carregar resumo do personal", error);
+      console.error("Erro ao carregar resumo do personal:", error);
     }
   };
 
@@ -35,7 +29,7 @@ const HomePersonal = () => {
       title: "Meus Alunos",
       icon: "👥",
       description: "Gerenciar lista de alunos",
-      path: "/personal/alunos", // 🔥 ROTA CORRIGIDA
+      path: "/personal/alunos",
       color: "bg-blue-500",
     },
     {
@@ -46,14 +40,14 @@ const HomePersonal = () => {
       color: "bg-orange-500",
     },
     {
-      title: "Ver Progresso",
+      title: "Progresso",
       icon: "📊",
       description: "Acompanhar evolução dos alunos",
       path: "/progresso-alunos",
       color: "bg-green-500",
     },
     {
-      title: "Criar Desafio",
+      title: "Desafios",
       icon: "🏆",
       description: "Criar desafios para alunos",
       path: "/criar-desafio",
@@ -80,33 +74,33 @@ const HomePersonal = () => {
       <Header title="MaxFit Pro" />
 
       <main className="pt-20 px-4 max-w-md mx-auto">
-        {/* Card de boas-vindas */}
+        {/* WELCOME CARD */}
         <div className="bg-gradient-to-r from-secondary to-primary rounded-2xl p-6 mb-6 text-white shadow-lg">
           <h2 className="text-2xl font-bold mb-2">
-            Olá, Personal {user?.nome?.split(" ")[0]}! 👨‍🏫
+            Olá, {user?.nome?.split(" ")[0]}! 👨‍🏫
           </h2>
-          <p className="text-white/90">
-            Pronto para treinar seus alunos hoje?
-          </p>
+          <p className="text-white/90">Pronto para treinar seus alunos hoje?</p>
         </div>
 
-        {/* Estatísticas REAIS */}
+        {/* ESTATÍSTICAS */}
         <div className="grid grid-cols-3 gap-3 mb-6">
           <div className="bg-white rounded-xl p-4 shadow-md text-center">
             <p className="text-2xl font-bold text-primary">{totalAlunos}</p>
             <p className="text-xs text-gray-600">Alunos</p>
           </div>
+
           <div className="bg-white rounded-xl p-4 shadow-md text-center">
             <p className="text-2xl font-bold text-green-500">8</p>
             <p className="text-xs text-gray-600">Treinos</p>
           </div>
+
           <div className="bg-white rounded-xl p-4 shadow-md text-center">
             <p className="text-2xl font-bold text-blue-500">3</p>
             <p className="text-xs text-gray-600">Desafios</p>
           </div>
         </div>
 
-        {/* Grid de cards */}
+        {/* MENU GRID */}
         <div className="grid grid-cols-2 gap-4">
           {menuItems.map((item, index) => (
             <button
@@ -119,9 +113,7 @@ const HomePersonal = () => {
               >
                 {item.icon}
               </div>
-              <h3 className="font-bold text-dark mb-1 text-sm">
-                {item.title}
-              </h3>
+              <h3 className="font-bold text-dark mb-1 text-sm">{item.title}</h3>
               <p className="text-xs text-gray-600">{item.description}</p>
             </button>
           ))}

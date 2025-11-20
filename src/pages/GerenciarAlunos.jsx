@@ -15,8 +15,10 @@ const GerenciarAlunos = () => {
   const personalId = user?.id;
 
   useEffect(() => {
-    carregarDados();
-  }, []);
+    if (personalId) {
+      carregarDados();
+    }
+  }, [personalId]);
 
   const carregarDados = async () => {
     try {
@@ -65,7 +67,6 @@ const GerenciarAlunos = () => {
         {loading && <p>Carregando...</p>}
         {erro && <p className="text-red-500 text-sm mb-2">{erro}</p>}
 
-        {/* Vincular aluno */}
         <section className="bg-white rounded-2xl p-4 mb-4 shadow-md">
           <h3 className="font-bold mb-2 text-sm">Vincular novo aluno</h3>
 
@@ -91,12 +92,13 @@ const GerenciarAlunos = () => {
           </button>
         </section>
 
-        {/* Lista de alunos do personal */}
         <section className="bg-white rounded-2xl p-4 shadow-md">
           <h3 className="font-bold mb-3 text-sm">Alunos vinculados</h3>
 
           {alunos.length === 0 ? (
-            <p className="text-xs text-gray-500">Nenhum aluno vinculado ainda.</p>
+            <p className="text-xs text-gray-500">
+              Nenhum aluno vinculado ainda.
+            </p>
           ) : (
             <ul className="space-y-2">
               {alunos.map((aluno) => (
