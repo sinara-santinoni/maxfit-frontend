@@ -6,7 +6,7 @@ import axios from "axios";
 const API_BASE_URL = "https://max-fit-api-4bkb.onrender.com/api";
 
 const api = axios.create({
-  baseURL: API_URL,
+  baseURL: API_BASE_URL,
   headers: {
     "Content-Type": "application/json",
   },
@@ -25,6 +25,50 @@ api.interceptors.request.use(
     return Promise.reject(error);
   }
 );
+
+// ========== SERVIÇOS DE AUTENTICAÇÃO ==========
+export const authService = {
+  /**
+   * Faz login do usuário
+   */
+  login: async (email, senha) => {
+    const response = await api.post("/login", { email, senha });
+    return {
+      token: response.data.token || "fake-token",
+      usuario: {
+        id: response.data.id,
+        nome: response.data.nome,
+        email: response.data.email,
+        tipo: response.data.tipo,
+        cidade: response.data.cidade,
+      },
+    };
+  },
+
+  /**
+   * Cadastra um novo aluno
+   */
+  cadastrarAluno: async (dados) => {
+    const payload = {
+      ...dados,
+      tipo: "ALUNO",
+    };
+    const response = await api.post("/cadastro", payload);
+    return response.data;
+  },
+
+  /**
+   * Cadastra um novo personal
+   */
+  cadastrarPersonal: async (dados) => {
+    const payload = {
+      ...dados,
+      tipo: "PERSONAL",
+    };
+    const response = await api.post("/cadastro", payload);
+    return response.data;
+  },
+};
 
 // ========== SERVIÇOS DE SUPORTE ==========
 export const suporteService = {
