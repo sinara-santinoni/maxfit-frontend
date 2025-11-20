@@ -9,6 +9,7 @@ const Suporte = () => {
   const [nutricionistas, setNutricionistas] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  // Carrega dados ao entrar
   useEffect(() => {
     carregarDados();
   }, []);
@@ -16,26 +17,27 @@ const Suporte = () => {
   const carregarDados = async () => {
     try {
       setLoading(true);
+
       const psi = await suporteService.listarPsicologos();
       const nutri = await suporteService.listarNutricionistas();
 
-      setPsicologos(psi?.data || []);
-      setNutricionistas(nutri?.data || []);
+      setPsicologos(psi || []);
+      setNutricionistas(nutri || []);
     } catch (error) {
-      console.error("Erro ao carregar:", error);
+      console.error("Erro ao carregar suporte:", error);
     } finally {
       setLoading(false);
     }
   };
 
-  const listaAtual =
-    aba === "psicologico" ? psicologos : nutricionistas;
+  // Lista da aba atual
+  const listaAtual = aba === "psicologico" ? psicologos : nutricionistas;
 
   return (
     <div className="min-h-screen bg-gray-50 pb-24">
       <Header title="Suporte" />
 
-      {/* MAIN CONTENT */}
+      {/* Corrige espaço do Header fixo */}
       <main className="pt-[90px] px-4 max-w-md mx-auto">
 
         {/* ABAS VERTICAIS */}
@@ -82,12 +84,13 @@ const Suporte = () => {
         </div>
 
         {/* CARD DE DESCRIÇÃO */}
-        <div className={`rounded-xl p-4 shadow-md border mb-6
-          ${
-            aba === "psicologico"
-              ? "bg-pink-50 border-pink-200"
-              : "bg-green-50 border-green-200"
-          }`}
+        <div
+          className={`rounded-xl p-4 shadow-md border mb-6
+            ${
+              aba === "psicologico"
+                ? "bg-pink-50 border-pink-200"
+                : "bg-green-50 border-green-200"
+            }`}
         >
           <h3 className="font-bold mb-1 text-pink-700">
             {aba === "psicologico"
@@ -104,15 +107,13 @@ const Suporte = () => {
 
         {/* LISTA DE PROFISSIONAIS */}
         {loading ? (
-          <p className="text-center text-gray-500">
-            Carregando profissionais...
-          </p>
+          <p className="text-center text-gray-500">Carregando profissionais...</p>
         ) : listaAtual.length === 0 ? (
           <p className="text-center text-gray-500">
             Ainda não há profissionais cadastrados.
           </p>
         ) : (
-          listaAtual.map((prof, index) => (
+          listaAtual.map((p, index) => (
             <div
               key={index}
               className="bg-white rounded-xl p-4 shadow-md border border-gray-200 mb-4 flex gap-4 items-center"
@@ -120,12 +121,12 @@ const Suporte = () => {
               <div className="text-4xl">👩‍⚕️</div>
 
               <div>
-                <h3 className="font-bold text-primary">{prof.nome}</h3>
-                <p className="text-gray-700 text-sm">{prof.especialidade}</p>
-                <p className="text-gray-500 text-sm">{prof.cidade}</p>
+                <h3 className="font-bold text-primary">{p.nome}</h3>
+                <p className="text-gray-700 text-sm">{p.especialidade}</p>
+                <p className="text-gray-500 text-sm">{p.cidade}</p>
 
-                <p className="text-sm mt-2">📞 {prof.telefone}</p>
-                <p className="text-sm">📧 {prof.email}</p>
+                <p className="text-sm mt-2">📞 {p.telefone}</p>
+                <p className="text-sm">📧 {p.email}</p>
               </div>
             </div>
           ))
