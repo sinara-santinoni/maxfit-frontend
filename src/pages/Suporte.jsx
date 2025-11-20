@@ -1,6 +1,4 @@
 import { useState, useEffect } from "react";
-import Header from "../components/Header";
-import BottomNav from "../components/BottomNav";
 import { suporteService } from "../services/api";
 
 /**
@@ -10,79 +8,100 @@ import { suporteService } from "../services/api";
 const Suporte = () => {
   const [psicologos, setPsicologos] = useState([]);
   const [nutricionistas, setNutricionistas] = useState([]);
+  const [tutoriais, setTutoriais] = useState([]);
+  const [dicas, setDicas] = useState([]);
   const [loading, setLoading] = useState(true);
   const [abaSelecionada, setAbaSelecionada] = useState("psicologico");
+  const [dicaSelecionada, setDicaSelecionada] = useState(null);
+  const [cidadeUsuario, setCidadeUsuario] = useState("Florianópolis"); // Pode vir do contexto/localStorage
 
   useEffect(() => {
-    carregarSuportes();
+    carregarDados();
   }, []);
 
-  const carregarSuportes = async () => {
+  const carregarDados = async () => {
     try {
       setLoading(true);
-      const [psi, nutri] = await Promise.all([
-        suporteService.listarPsicologos(),
-        suporteService.listarNutricionistas(),
+
+      // Carrega todos os dados em paralelo
+      const [psi, nutri, tut, dic] = await Promise.all([
+        suporteService.listarPsicologos(cidadeUsuario),
+        suporteService.listarNutricionistas(cidadeUsuario),
+        suporteService.listarTutoriais(),
+        suporteService.listarDicas(),
       ]);
 
       setPsicologos(psi);
       setNutricionistas(nutri);
+      setTutoriais(tut);
+      setDicas(dic);
     } catch (error) {
-      console.error("Erro ao carregar suportes:", error);
+      console.error("Erro ao carregar dados de suporte:", error);
+      // Em caso de erro, usa dados mockados
+      carregarDadosMockados();
     } finally {
       setLoading(false);
     }
   };
 
-  // Tutoriais (estático por enquanto)
-  const tutoriais = [
-    {
-      id: 1,
-      titulo: "Como fazer supino corretamente",
-      descricao: "Técnica correta e erros comuns",
-      url: "https://youtube.com/watch?v=exemplo1",
-      thumbnail: "🎥",
-    },
-    {
-      id: 2,
-      titulo: "Agachamento livre: guia completo",
-      descricao: "Passo a passo para iniciantes",
-      url: "https://youtube.com/watch?v=exemplo2",
-      thumbnail: "🎥",
-    },
-    {
-      id: 3,
-      titulo: "Alongamentos pré-treino",
-      descricao: "Prepare seu corpo corretamente",
-      url: "https://youtube.com/watch?v=exemplo3",
-      thumbnail: "🎥",
-    },
-  ];
+  // Fallback com dados mockados caso a API falhe
+  const carregarDadosMockados = () => {
+    setPsicologos([
+      {
+        id: 1,
+        nome: "Dra. Maria Silva",
+        especialidade: "Psicologia Clínica",
+        cidade: "Florianópolis, SC",
+        telefone: "(48) 99999-1111",
+        email: "maria.silva@email.com",
+      },
+    ]);
 
-  const dicas = [
-    {
-      id: 1,
-      titulo: "A importância da hidratação",
-      descricao: "Beber água antes, durante e após o treino é essencial...",
-      categoria: "Saúde",
-    },
-    {
-      id: 2,
-      titulo: "Como evitar lesões na musculação",
-      descricao: "Dicas de prevenção e cuidados importantes...",
-      categoria: "Segurança",
-    },
-    {
-      id: 3,
-      titulo: "Nutrição pré-treino",
-      descricao: "O que comer antes de treinar para melhor performance...",
-      categoria: "Nutrição",
-    },
-  ];
+    setNutricionistas([
+      {
+        id: 1,
+        nome: "Dra. Ana Costa",
+        especialidade: "Nutrição Esportiva",
+        cidade: "Florianópolis, SC",
+        telefone: "(48) 99999-3333",
+        email: "ana.costa@email.com",
+      },
+    ]);
+
+    setTutoriais([
+      {
+        id: 1,
+        titulo: "Como fazer supino corretamente",
+        descricao: "Técnica correta e erros comuns",
+        url: "https://www.youtube.com/watch?v=rT7DgCr-3pg",
+        thumbnail: "🎥",
+      },
+      {
+        id: 2,
+        titulo: "Agachamento livre: guia completo",
+        descricao: "Passo a passo para iniciantes",
+        url: "https://www.youtube.com/watch?v=ultWZbUMPL8",
+        thumbnail: "🎥",
+      },
+    ]);
+
+    setDicas([
+      {
+        id: 1,
+        titulo: "A importância da hidratação",
+        descricao: "Beber água antes, durante e após o treino é essencial.",
+        categoria: "Saúde",
+        conteudo: "A hidratação adequada é crucial para o desempenho físico.",
+      },
+    ]);
+  };
 
   return (
     <div className="min-h-screen bg-gray-50 pb-24">
-      <Header title="Suporte" />
+      {/* Header */}
+      <div className="bg-gradient-to-r from-blue-600 to-blue-700 text-white p-4 shadow-lg fixed top-0 w-full z-40">
+        <h1 className="text-xl font-bold text-center">Suporte</h1>
+      </div>
 
       <main className="pt-20 px-4 max-w-md mx-auto">
         {/* Abas */}
@@ -93,7 +112,7 @@ const Suporte = () => {
               onClick={() => setAbaSelecionada(aba)}
               className={`px-4 py-2 rounded-full text-sm font-semibold whitespace-nowrap transition-colors ${
                 abaSelecionada === aba
-                  ? "bg-primary text-white"
+                  ? "bg-blue-600 text-white"
                   : "bg-white text-gray-700 border border-gray-300"
               }`}
             >
@@ -121,7 +140,7 @@ const Suporte = () => {
 
             {loading ? (
               <div className="flex justify-center py-8">
-                <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-primary"></div>
+                <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600"></div>
               </div>
             ) : (
               <div className="space-y-4">
@@ -141,7 +160,7 @@ const Suporte = () => {
                     {psicologos.map((psicologo) => (
                       <div
                         key={psicologo.id}
-                        className="card p-4 bg-white rounded-lg shadow hover:shadow-md transition-shadow"
+                        className="p-4 bg-white rounded-lg shadow hover:shadow-md transition-shadow"
                       >
                         <div className="flex items-start gap-4">
                           <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center text-3xl flex-shrink-0">
@@ -149,7 +168,7 @@ const Suporte = () => {
                           </div>
 
                           <div className="flex-1 min-w-0">
-                            <h4 className="font-bold text-dark text-lg">
+                            <h4 className="font-bold text-gray-900 text-lg">
                               {psicologo.nome}
                             </h4>
                             <p className="text-sm text-purple-600 font-semibold mb-1">
@@ -163,7 +182,7 @@ const Suporte = () => {
                               {psicologo.telefone && (
                                 <a
                                   href={`tel:${psicologo.telefone}`}
-                                  className="text-primary hover:underline flex items-center gap-2"
+                                  className="text-blue-600 hover:underline flex items-center gap-2"
                                 >
                                   📞 {psicologo.telefone}
                                 </a>
@@ -172,7 +191,7 @@ const Suporte = () => {
                               {psicologo.email && (
                                 <a
                                   href={`mailto:${psicologo.email}`}
-                                  className="text-primary hover:underline flex items-center gap-2 truncate"
+                                  className="text-blue-600 hover:underline flex items-center gap-2 truncate"
                                 >
                                   ✉️ {psicologo.email}
                                 </a>
@@ -203,7 +222,7 @@ const Suporte = () => {
 
             {loading ? (
               <div className="flex justify-center py-8">
-                <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-primary"></div>
+                <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600"></div>
               </div>
             ) : (
               <div className="space-y-4">
@@ -223,7 +242,7 @@ const Suporte = () => {
                     {nutricionistas.map((nutricionista) => (
                       <div
                         key={nutricionista.id}
-                        className="card p-4 bg-white rounded-lg shadow hover:shadow-md transition-shadow"
+                        className="p-4 bg-white rounded-lg shadow hover:shadow-md transition-shadow"
                       >
                         <div className="flex items-start gap-4">
                           <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center text-3xl flex-shrink-0">
@@ -231,7 +250,7 @@ const Suporte = () => {
                           </div>
 
                           <div className="flex-1 min-w-0">
-                            <h4 className="font-bold text-dark text-lg">
+                            <h4 className="font-bold text-gray-900 text-lg">
                               {nutricionista.nome}
                             </h4>
                             <p className="text-sm text-green-600 font-semibold mb-1">
@@ -245,7 +264,7 @@ const Suporte = () => {
                               {nutricionista.telefone && (
                                 <a
                                   href={`tel:${nutricionista.telefone}`}
-                                  className="text-primary hover:underline flex items-center gap-2"
+                                  className="text-blue-600 hover:underline flex items-center gap-2"
                                 >
                                   📞 {nutricionista.telefone}
                                 </a>
@@ -254,7 +273,7 @@ const Suporte = () => {
                               {nutricionista.email && (
                                 <a
                                   href={`mailto:${nutricionista.email}`}
-                                  className="text-primary hover:underline flex items-center gap-2 truncate"
+                                  className="text-blue-600 hover:underline flex items-center gap-2 truncate"
                                 >
                                   ✉️ {nutricionista.email}
                                 </a>
@@ -283,38 +302,50 @@ const Suporte = () => {
               </p>
             </div>
 
-            <div className="space-y-4">
-              {tutoriais.map((tutorial) => (
-                <div
-                  key={tutorial.id}
-                  className="card p-4 bg-white rounded-lg shadow"
-                >
-                  <div className="flex items-start gap-4">
-                    <div className="w-20 h-20 bg-red-100 rounded-lg flex items-center justify-center text-4xl">
-                      {tutorial.thumbnail}
-                    </div>
+            {loading ? (
+              <div className="flex justify-center py-8">
+                <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600"></div>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {tutoriais.length === 0 ? (
+                  <p className="text-center text-gray-600 py-8">
+                    Nenhum tutorial disponível no momento
+                  </p>
+                ) : (
+                  tutoriais.map((tutorial) => (
+                    <div
+                      key={tutorial.id}
+                      className="p-4 bg-white rounded-lg shadow hover:shadow-md transition-shadow"
+                    >
+                      <div className="flex items-start gap-4">
+                        <div className="w-20 h-20 bg-red-100 rounded-lg flex items-center justify-center text-4xl flex-shrink-0">
+                          {tutorial.thumbnail}
+                        </div>
 
-                    <div className="flex-1">
-                      <h4 className="font-bold text-dark mb-1">
-                        {tutorial.titulo}
-                      </h4>
-                      <p className="text-sm text-gray-600 mb-3">
-                        {tutorial.descricao}
-                      </p>
+                        <div className="flex-1">
+                          <h4 className="font-bold text-gray-900 mb-1">
+                            {tutorial.titulo}
+                          </h4>
+                          <p className="text-sm text-gray-600 mb-3">
+                            {tutorial.descricao}
+                          </p>
 
-                      <a
-                        href={tutorial.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-primary font-semibold hover:underline"
-                      >
-                        Assistir vídeo →
-                      </a>
+                          <a
+                            href={tutorial.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-blue-600 font-semibold hover:underline inline-flex items-center gap-1"
+                          >
+                            Assistir vídeo →
+                          </a>
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                </div>
-              ))}
-            </div>
+                  ))
+                )}
+              </div>
+            )}
           </div>
         )}
 
@@ -330,34 +361,116 @@ const Suporte = () => {
               </p>
             </div>
 
-            <div className="space-y-4">
-              {dicas.map((dica) => (
+            {loading ? (
+              <div className="flex justify-center py-8">
+                <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600"></div>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {dicas.length === 0 ? (
+                  <p className="text-center text-gray-600 py-8">
+                    Nenhuma dica disponível no momento
+                  </p>
+                ) : (
+                  dicas.map((dica) => (
+                    <div
+                      key={dica.id}
+                      className="p-4 bg-white rounded-lg shadow hover:shadow-md transition-shadow"
+                    >
+                      <div className="flex items-start justify-between mb-2">
+                        <h4 className="font-bold text-gray-900 flex-1">
+                          {dica.titulo}
+                        </h4>
+                        <span className="bg-yellow-100 text-yellow-800 text-xs px-2 py-1 rounded-full font-semibold ml-2 whitespace-nowrap">
+                          {dica.categoria}
+                        </span>
+                      </div>
+
+                      <p className="text-sm text-gray-700 mb-3">
+                        {dica.descricao}
+                      </p>
+
+                      <button
+                        onClick={() => setDicaSelecionada(dica)}
+                        className="text-blue-600 text-sm font-semibold hover:underline"
+                      >
+                        Ler mais →
+                      </button>
+                    </div>
+                  ))
+                )}
+              </div>
+            )}
+
+            {/* Modal de Dica Completa */}
+            {dicaSelecionada && (
+              <div
+                className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50"
+                onClick={() => setDicaSelecionada(null)}
+              >
                 <div
-                  key={dica.id}
-                  className="card p-4 bg-white rounded-lg shadow"
+                  className="bg-white rounded-lg max-w-lg w-full max-h-[80vh] overflow-y-auto"
+                  onClick={(e) => e.stopPropagation()}
                 >
-                  <div className="flex items-start justify-between mb-2">
-                    <h4 className="font-bold text-dark flex-1">
-                      {dica.titulo}
-                    </h4>
-                    <span className="bg-yellow-100 text-yellow-800 text-xs px-2 py-1 rounded-full font-semibold">
-                      {dica.categoria}
-                    </span>
+                  <div className="sticky top-0 bg-white border-b p-4 flex items-start justify-between">
+                    <div className="flex-1 pr-4">
+                      <h3 className="font-bold text-lg text-gray-900 mb-2">
+                        {dicaSelecionada.titulo}
+                      </h3>
+                      <span className="bg-yellow-100 text-yellow-800 text-xs px-2 py-1 rounded-full font-semibold">
+                        {dicaSelecionada.categoria}
+                      </span>
+                    </div>
+                    <button
+                      onClick={() => setDicaSelecionada(null)}
+                      className="text-gray-500 hover:text-gray-700 text-2xl leading-none flex-shrink-0"
+                    >
+                      ×
+                    </button>
                   </div>
 
-                  <p className="text-sm text-gray-700 mb-3">{dica.descricao}</p>
+                  <div className="p-4">
+                    <p className="text-gray-700 leading-relaxed whitespace-pre-line">
+                      {dicaSelecionada.conteudo}
+                    </p>
+                  </div>
 
-                  <button className="text-primary text-sm font-semibold hover:underline">
-                    Ler mais →
-                  </button>
+                  <div className="sticky bottom-0 bg-gray-50 border-t p-4">
+                    <button
+                      onClick={() => setDicaSelecionada(null)}
+                      className="w-full bg-blue-600 text-white py-2 rounded-lg font-semibold hover:bg-blue-700 transition-colors"
+                    >
+                      Fechar
+                    </button>
+                  </div>
                 </div>
-              ))}
-            </div>
+              </div>
+            )}
           </div>
         )}
       </main>
 
-      <BottomNav />
+      {/* Bottom Navigation */}
+      <div className="fixed bottom-0 w-full bg-white border-t shadow-lg z-40">
+        <div className="flex justify-around items-center py-2">
+          <button className="flex flex-col items-center p-2 text-gray-600 hover:text-blue-600 transition-colors">
+            <span className="text-2xl">🏠</span>
+            <span className="text-xs">Home</span>
+          </button>
+          <button className="flex flex-col items-center p-2 text-gray-600 hover:text-blue-600 transition-colors">
+            <span className="text-2xl">💪</span>
+            <span className="text-xs">Treinos</span>
+          </button>
+          <button className="flex flex-col items-center p-2 text-blue-600">
+            <span className="text-2xl">❤️</span>
+            <span className="text-xs font-semibold">Suporte</span>
+          </button>
+          <button className="flex flex-col items-center p-2 text-gray-600 hover:text-blue-600 transition-colors">
+            <span className="text-2xl">👤</span>
+            <span className="text-xs">Perfil</span>
+          </button>
+        </div>
+      </div>
     </div>
   );
 };
