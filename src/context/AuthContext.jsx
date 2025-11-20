@@ -1,5 +1,5 @@
 import { createContext, useState, useContext, useEffect } from 'react';
-import { authService } from '../services/api';
+import { authService } from '../services/api.js';  // 🔥 EXTENSÃO .js É OBRIGATÓRIA NO VITE
 
 // Criar o contexto
 const AuthContext = createContext({});
@@ -57,7 +57,6 @@ export const AuthProvider = ({ children }) => {
   // CADASTRO ------------------------------------------------------
   const cadastrar = async (tipo, dados) => {
     try {
-      // Aqui dados já contém a cidade — só chamamos a API certa
       if (tipo === 'ALUNO') {
         await authService.cadastrarAluno(dados);
       } else {
