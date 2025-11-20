@@ -1,81 +1,82 @@
-import { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
+import { useState } from "react";
+import { useNavigate, Link } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 
 const Cadastro = () => {
   const navigate = useNavigate();
   const { cadastrar } = useAuth();
-  
+
   const [passo, setPasso] = useState(1);
-  const [tipo, setTipo] = useState('');
+  const [tipo, setTipo] = useState("");
 
   const [formData, setFormData] = useState({
-    nome: '',
-    email: '',
-    senha: '',
-    confirmarSenha: '',
-    telefone: '',
-    dataNascimento: '',
-    cidade: '',              // 👈 NOVO CAMPO
+    nome: "",
+    email: "",
+    senha: "",
+    confirmarSenha: "",
+    telefone: "",
+    dataNascimento: "",
+    cidade: "", // 👈 NOVO CAMPO
 
-    peso: '',
-    altura: '',
-    objetivo: '',
-    cref: '',
-    especialidade: '',
+    peso: "",
+    altura: "",
+    objetivo: "",
+    cref: "",
+    especialidade: "",
   });
-  
-  const [error, setError] = useState('');
+
+  const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-
-  const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    });
-  };
-
-  const handleEscolherTipo = (tipoSelecionado) => {
-    setTipo(tipoSelecionado);
-    setPasso(2);
-  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
+    setError("");
     setLoading(true);
 
-    if (!formData.nome || !formData.email || !formData.senha || !formData.cidade) {
-      setError('Preencha todos os campos obrigatórios');
+    // validações básicas
+    if (
+      !formData.nome ||
+      !formData.email ||
+      !formData.senha ||
+      !formData.cidade
+    ) {
+      setError("Preencha todos os campos obrigatórios");
       setLoading(false);
       return;
     }
 
     if (formData.senha !== formData.confirmarSenha) {
-      setError('As senhas não coincidem');
+      setError("As senhas não coincidem");
       setLoading(false);
       return;
     }
 
     if (formData.senha.length < 6) {
-      setError('A senha deve ter pelo menos 6 caracteres');
+      setError("A senha deve ter pelo menos 6 caracteres");
       setLoading(false);
       return;
     }
 
-    // 👇 MONTA O OBJETO A SER ENVIADO AO BACKEND
+    // objetivo obrigatório para aluno (opcional)
+    if (tipo === "ALUNO" && !formData.objetivo) {
+      setError("Selecione um objetivo");
+      setLoading(false);
+      return;
+    }
+
+    // monta objeto para o backend
     const dadosCadastro = {
       nome: formData.nome,
       email: formData.email,
       senha: formData.senha,
-      cidade: formData.cidade,        // 👈 ENVIA A CIDADE
+      cidade: formData.cidade,
       telefone: formData.telefone,
       dataNascimento: formData.dataNascimento,
     };
 
-    if (tipo === 'ALUNO') {
-      dadosCadastro.peso = parseFloat(formData.peso);
-      dadosCadastro.altura = parseFloat(formData.altura);
+    if (tipo === "ALUNO") {
+      if (formData.peso) dadosCadastro.peso = parseFloat(formData.peso);
+      if (formData.altura) dadosCadastro.altura = parseFloat(formData.altura);
       dadosCadastro.objetivo = formData.objetivo;
     } else {
       dadosCadastro.cref = formData.cref;
@@ -83,36 +84,34 @@ const Cadastro = () => {
     }
 
     const result = await cadastrar(tipo, dadosCadastro);
-    
+
     if (result.success) {
-      alert('Cadastro realizado com sucesso! Faça login para continuar.');
-      navigate('/login');
+      alert("Cadastro realizado com sucesso! Faça login para continuar.");
+      navigate("/login");
     } else {
       setError(result.message);
     }
-    
+
     setLoading(false);
   };
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-primary to-secondary flex items-center justify-center px-4 py-8">
       <div className="w-full max-w-md">
-
         <div className="text-center mb-6">
           <h1 className="text-4xl font-bold text-white mb-2">💪 MaxFit</h1>
         </div>
 
         <div className="bg-white rounded-2xl shadow-xl p-8">
-
           {passo === 1 && (
             <>
               <h2 className="text-2xl font-bold text-dark mb-6 text-center">
                 Escolha seu perfil
               </h2>
-              
+
               <div className="space-y-4">
                 <button
-                  onClick={() => handleEscolherTipo('ALUNO')}
+                  onClick={() => handleEscolherTipo("ALUNO")}
                   className="w-full bg-white border-2 border-primary hover:bg-primary hover:text-white transition-all p-6 rounded-xl text-left group"
                 >
                   <div className="flex items-center">
@@ -127,7 +126,7 @@ const Cadastro = () => {
                 </button>
 
                 <button
-                  onClick={() => handleEscolherTipo('PERSONAL')}
+                  onClick={() => handleEscolherTipo("PERSONAL")}
                   className="w-full bg-white border-2 border-secondary hover:bg-secondary hover:text-white transition-all p-6 rounded-xl text-left group"
                 >
                   <div className="flex items-center">
@@ -144,7 +143,8 @@ const Cadastro = () => {
 
               <div className="mt-6 text-center">
                 <Link to="/login" className="text-gray-600 hover:text-primary">
-                  Já tem uma conta? <span className="font-semibold">Entrar</span>
+                  Já tem uma conta?{" "}
+                  <span className="font-semibold">Entrar</span>
                 </Link>
               </div>
             </>
@@ -160,7 +160,7 @@ const Cadastro = () => {
               </button>
 
               <h2 className="text-2xl font-bold text-dark mb-6">
-                Cadastro de {tipo === 'ALUNO' ? 'Aluno' : 'Personal'}
+                Cadastro de {tipo === "ALUNO" ? "Aluno" : "Personal"}
               </h2>
 
               {error && (
@@ -170,7 +170,6 @@ const Cadastro = () => {
               )}
 
               <form onSubmit={handleSubmit} className="space-y-4">
-
                 {/* Nome */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -272,7 +271,7 @@ const Cadastro = () => {
                 </div>
 
                 {/* ALUNO */}
-                {tipo === 'ALUNO' && (
+                {tipo === "ALUNO" && (
                   <>
                     <div className="grid grid-cols-2 gap-4">
                       <div>
@@ -314,16 +313,20 @@ const Cadastro = () => {
                       >
                         <option value="">Selecione...</option>
                         <option value="PERDER_PESO">Perder peso</option>
-                        <option value="GANHAR_MASSA">Ganhar massa muscular</option>
+                        <option value="GANHAR_MASSA">
+                          Ganhar massa muscular
+                        </option>
                         <option value="MANTER_FORMA">Manter a forma</option>
-                        <option value="CONDICIONAMENTO">Melhorar condicionamento</option>
+                        <option value="CONDICIONAMENTO">
+                          Melhorar condicionamento
+                        </option>
                       </select>
                     </div>
                   </>
                 )}
 
                 {/* PERSONAL */}
-                {tipo === 'PERSONAL' && (
+                {tipo === "PERSONAL" && (
                   <>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -358,13 +361,12 @@ const Cadastro = () => {
                   disabled={loading}
                   className="btn-primary disabled:opacity-50"
                 >
-                  {loading ? 'Cadastrando...' : 'Criar conta'}
+                  {loading ? "Cadastrando..." : "Criar conta"}
                 </button>
               </form>
             </>
           )}
         </div>
-
       </div>
     </div>
   );

@@ -1,135 +1,359 @@
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 import Header from "../components/Header";
 import BottomNav from "../components/BottomNav";
 import { suporteService } from "../services/api";
 
+/**
+ * Página de Suporte
+ * Oferece suporte psicológico, nutricional, tutoriais e dicas
+ */
 const Suporte = () => {
-  const [aba, setAba] = useState("psicologico");
   const [psicologos, setPsicologos] = useState([]);
   const [nutricionistas, setNutricionistas] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [abaSelecionada, setAbaSelecionada] = useState("psicologico");
 
-  // Carrega dados ao entrar
   useEffect(() => {
-    carregarDados();
+    carregarSuportes();
   }, []);
 
-  const carregarDados = async () => {
+  const carregarSuportes = async () => {
     try {
       setLoading(true);
+      const [psi, nutri] = await Promise.all([
+        suporteService.listarPsicologos(),
+        suporteService.listarNutricionistas(),
+      ]);
 
-      const psi = await suporteService.listarPsicologos();
-      const nutri = await suporteService.listarNutricionistas();
-
-      setPsicologos(psi || []);
-      setNutricionistas(nutri || []);
+      setPsicologos(psi);
+      setNutricionistas(nutri);
     } catch (error) {
-      console.error("Erro ao carregar suporte:", error);
+      console.error("Erro ao carregar suportes:", error);
     } finally {
       setLoading(false);
     }
   };
 
-  // Lista da aba atual
-  const listaAtual = aba === "psicologico" ? psicologos : nutricionistas;
+  // Tutoriais (estático por enquanto)
+  const tutoriais = [
+    {
+      id: 1,
+      titulo: "Como fazer supino corretamente",
+      descricao: "Técnica correta e erros comuns",
+      url: "https://youtube.com/watch?v=exemplo1",
+      thumbnail: "🎥",
+    },
+    {
+      id: 2,
+      titulo: "Agachamento livre: guia completo",
+      descricao: "Passo a passo para iniciantes",
+      url: "https://youtube.com/watch?v=exemplo2",
+      thumbnail: "🎥",
+    },
+    {
+      id: 3,
+      titulo: "Alongamentos pré-treino",
+      descricao: "Prepare seu corpo corretamente",
+      url: "https://youtube.com/watch?v=exemplo3",
+      thumbnail: "🎥",
+    },
+  ];
+
+  const dicas = [
+    {
+      id: 1,
+      titulo: "A importância da hidratação",
+      descricao: "Beber água antes, durante e após o treino é essencial...",
+      categoria: "Saúde",
+    },
+    {
+      id: 2,
+      titulo: "Como evitar lesões na musculação",
+      descricao: "Dicas de prevenção e cuidados importantes...",
+      categoria: "Segurança",
+    },
+    {
+      id: 3,
+      titulo: "Nutrição pré-treino",
+      descricao: "O que comer antes de treinar para melhor performance...",
+      categoria: "Nutrição",
+    },
+  ];
 
   return (
     <div className="min-h-screen bg-gray-50 pb-24">
       <Header title="Suporte" />
 
-      {/* Corrige espaço do Header fixo */}
-      <main className="pt-[90px] px-4 max-w-md mx-auto">
-
-        {/* ABAS VERTICAIS */}
-        <div className="flex flex-col gap-3 mb-6">
-
-          <button
-            onClick={() => setAba("psicologico")}
-            className={`w-full py-3 rounded-xl font-semibold border shadow-sm flex items-center gap-2 px-4
-              ${
-                aba === "psicologico"
-                  ? "bg-pink-100 text-pink-600 border-pink-300"
-                  : "bg-white text-gray-700 border-gray-300"
+      <main className="pt-20 px-4 max-w-md mx-auto">
+        {/* Abas */}
+        <div className="flex gap-2 mb-6 overflow-x-auto pb-2">
+          {["psicologico", "nutricional", "tutoriais", "dicas"].map((aba) => (
+            <button
+              key={aba}
+              onClick={() => setAbaSelecionada(aba)}
+              className={`px-4 py-2 rounded-full text-sm font-semibold whitespace-nowrap transition-colors ${
+                abaSelecionada === aba
+                  ? "bg-primary text-white"
+                  : "bg-white text-gray-700 border border-gray-300"
               }`}
-          >
-            🧠 Psicológico
-          </button>
-
-          <button
-            onClick={() => setAba("nutricional")}
-            className={`w-full py-3 rounded-xl font-semibold border shadow-sm flex items-center gap-2 px-4
-              ${
-                aba === "nutricional"
-                  ? "bg-green-100 text-green-600 border-green-300"
-                  : "bg-white text-gray-700 border-gray-300"
-              }`}
-          >
-            🥗 Nutricional
-          </button>
-
-          <button
-            onClick={() => setAba("tutoriais")}
-            className="w-full py-3 rounded-xl font-semibold border shadow-sm flex items-center gap-2 px-4 bg-white text-gray-700 border-gray-300"
-          >
-            🎓 Tutoriais
-          </button>
-
-          <button
-            onClick={() => setAba("dicas")}
-            className="w-full py-3 rounded-xl font-semibold border shadow-sm flex items-center gap-2 px-4 bg-white text-gray-700 border-gray-300"
-          >
-            💡 Dicas
-          </button>
-
-        </div>
-
-        {/* CARD DE DESCRIÇÃO */}
-        <div
-          className={`rounded-xl p-4 shadow-md border mb-6
-            ${
-              aba === "psicologico"
-                ? "bg-pink-50 border-pink-200"
-                : "bg-green-50 border-green-200"
-            }`}
-        >
-          <h3 className="font-bold mb-1 text-pink-700">
-            {aba === "psicologico"
-              ? "Cuide da sua saúde mental"
-              : "Cuide da sua saúde nutricional"}
-          </h3>
-
-          <p className="text-gray-600 text-sm">
-            {aba === "psicologico"
-              ? "Entre em contato com nossos profissionais para apoio emocional."
-              : "Encontre nutricionistas para te ajudar a manter uma alimentação saudável."}
-          </p>
-        </div>
-
-        {/* LISTA DE PROFISSIONAIS */}
-        {loading ? (
-          <p className="text-center text-gray-500">Carregando profissionais...</p>
-        ) : listaAtual.length === 0 ? (
-          <p className="text-center text-gray-500">
-            Ainda não há profissionais cadastrados.
-          </p>
-        ) : (
-          listaAtual.map((p, index) => (
-            <div
-              key={index}
-              className="bg-white rounded-xl p-4 shadow-md border border-gray-200 mb-4 flex gap-4 items-center"
             >
-              <div className="text-4xl">👩‍⚕️</div>
+              {aba === "psicologico" && "🧠 Psicológico"}
+              {aba === "nutricional" && "🥗 Nutricional"}
+              {aba === "tutoriais" && "🎥 Tutoriais"}
+              {aba === "dicas" && "💡 Dicas"}
+            </button>
+          ))}
+        </div>
 
-              <div>
-                <h3 className="font-bold text-primary">{p.nome}</h3>
-                <p className="text-gray-700 text-sm">{p.especialidade}</p>
-                <p className="text-gray-500 text-sm">{p.cidade}</p>
+        {/* ==== CONTEÚDOS ==== */}
 
-                <p className="text-sm mt-2">📞 {p.telefone}</p>
-                <p className="text-sm">📧 {p.email}</p>
-              </div>
+        {/* Suporte Psicológico */}
+        {abaSelecionada === "psicologico" && (
+          <div>
+            <div className="bg-purple-50 border border-purple-200 rounded-lg p-4 mb-6">
+              <h3 className="font-bold text-purple-900 mb-2">
+                🧠 Cuide da sua saúde mental
+              </h3>
+              <p className="text-sm text-purple-800">
+                Entre em contato com nossos profissionais para apoio emocional.
+              </p>
             </div>
-          ))
+
+            {loading ? (
+              <div className="flex justify-center py-8">
+                <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-primary"></div>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {psicologos.length === 0 ? (
+                  <p className="text-center text-gray-600 py-8">
+                    Nenhum profissional disponível na sua região
+                  </p>
+                ) : (
+                  <>
+                    <p className="text-sm text-gray-600 mb-4">
+                      {psicologos.length}{" "}
+                      {psicologos.length === 1
+                        ? "profissional encontrado"
+                        : "profissionais encontrados"}{" "}
+                      na sua região
+                    </p>
+                    {psicologos.map((psicologo) => (
+                      <div
+                        key={psicologo.id}
+                        className="card p-4 bg-white rounded-lg shadow hover:shadow-md transition-shadow"
+                      >
+                        <div className="flex items-start gap-4">
+                          <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center text-3xl flex-shrink-0">
+                            👨‍⚕️
+                          </div>
+
+                          <div className="flex-1 min-w-0">
+                            <h4 className="font-bold text-dark text-lg">
+                              {psicologo.nome}
+                            </h4>
+                            <p className="text-sm text-purple-600 font-semibold mb-1">
+                              {psicologo.especialidade}
+                            </p>
+                            <p className="text-xs text-gray-500 mb-3 flex items-center gap-1">
+                              📍 {psicologo.cidade}
+                            </p>
+
+                            <div className="flex flex-col gap-2 text-sm">
+                              {psicologo.telefone && (
+                                <a
+                                  href={`tel:${psicologo.telefone}`}
+                                  className="text-primary hover:underline flex items-center gap-2"
+                                >
+                                  📞 {psicologo.telefone}
+                                </a>
+                              )}
+
+                              {psicologo.email && (
+                                <a
+                                  href={`mailto:${psicologo.email}`}
+                                  className="text-primary hover:underline flex items-center gap-2 truncate"
+                                >
+                                  ✉️ {psicologo.email}
+                                </a>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </>
+                )}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Suporte Nutricional */}
+        {abaSelecionada === "nutricional" && (
+          <div>
+            <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-6">
+              <h3 className="font-bold text-green-900 mb-2">
+                🥗 Alimentação equilibrada
+              </h3>
+              <p className="text-sm text-green-800">
+                Fale com nossos nutricionistas para otimizar sua dieta.
+              </p>
+            </div>
+
+            {loading ? (
+              <div className="flex justify-center py-8">
+                <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-primary"></div>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {nutricionistas.length === 0 ? (
+                  <p className="text-center text-gray-600 py-8">
+                    Nenhum profissional disponível na sua região
+                  </p>
+                ) : (
+                  <>
+                    <p className="text-sm text-gray-600 mb-4">
+                      {nutricionistas.length}{" "}
+                      {nutricionistas.length === 1
+                        ? "profissional encontrado"
+                        : "profissionais encontrados"}{" "}
+                      na sua região
+                    </p>
+                    {nutricionistas.map((nutricionista) => (
+                      <div
+                        key={nutricionista.id}
+                        className="card p-4 bg-white rounded-lg shadow hover:shadow-md transition-shadow"
+                      >
+                        <div className="flex items-start gap-4">
+                          <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center text-3xl flex-shrink-0">
+                            👩‍⚕️
+                          </div>
+
+                          <div className="flex-1 min-w-0">
+                            <h4 className="font-bold text-dark text-lg">
+                              {nutricionista.nome}
+                            </h4>
+                            <p className="text-sm text-green-600 font-semibold mb-1">
+                              {nutricionista.especialidade}
+                            </p>
+                            <p className="text-xs text-gray-500 mb-3 flex items-center gap-1">
+                              📍 {nutricionista.cidade}
+                            </p>
+
+                            <div className="flex flex-col gap-2 text-sm">
+                              {nutricionista.telefone && (
+                                <a
+                                  href={`tel:${nutricionista.telefone}`}
+                                  className="text-primary hover:underline flex items-center gap-2"
+                                >
+                                  📞 {nutricionista.telefone}
+                                </a>
+                              )}
+
+                              {nutricionista.email && (
+                                <a
+                                  href={`mailto:${nutricionista.email}`}
+                                  className="text-primary hover:underline flex items-center gap-2 truncate"
+                                >
+                                  ✉️ {nutricionista.email}
+                                </a>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </>
+                )}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Tutoriais */}
+        {abaSelecionada === "tutoriais" && (
+          <div>
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+              <h3 className="font-bold text-blue-900 mb-2">
+                🎥 Aprenda as técnicas
+              </h3>
+              <p className="text-sm text-blue-800">
+                Vídeos educativos para melhorar a execução.
+              </p>
+            </div>
+
+            <div className="space-y-4">
+              {tutoriais.map((tutorial) => (
+                <div
+                  key={tutorial.id}
+                  className="card p-4 bg-white rounded-lg shadow"
+                >
+                  <div className="flex items-start gap-4">
+                    <div className="w-20 h-20 bg-red-100 rounded-lg flex items-center justify-center text-4xl">
+                      {tutorial.thumbnail}
+                    </div>
+
+                    <div className="flex-1">
+                      <h4 className="font-bold text-dark mb-1">
+                        {tutorial.titulo}
+                      </h4>
+                      <p className="text-sm text-gray-600 mb-3">
+                        {tutorial.descricao}
+                      </p>
+
+                      <a
+                        href={tutorial.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-primary font-semibold hover:underline"
+                      >
+                        Assistir vídeo →
+                      </a>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Dicas */}
+        {abaSelecionada === "dicas" && (
+          <div>
+            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
+              <h3 className="font-bold text-yellow-900 mb-2">
+                💡 Dicas e Artigos
+              </h3>
+              <p className="text-sm text-yellow-800">
+                Conteúdos educativos para melhorar seus resultados.
+              </p>
+            </div>
+
+            <div className="space-y-4">
+              {dicas.map((dica) => (
+                <div
+                  key={dica.id}
+                  className="card p-4 bg-white rounded-lg shadow"
+                >
+                  <div className="flex items-start justify-between mb-2">
+                    <h4 className="font-bold text-dark flex-1">
+                      {dica.titulo}
+                    </h4>
+                    <span className="bg-yellow-100 text-yellow-800 text-xs px-2 py-1 rounded-full font-semibold">
+                      {dica.categoria}
+                    </span>
+                  </div>
+
+                  <p className="text-sm text-gray-700 mb-3">{dica.descricao}</p>
+
+                  <button className="text-primary text-sm font-semibold hover:underline">
+                    Ler mais →
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
         )}
       </main>
 

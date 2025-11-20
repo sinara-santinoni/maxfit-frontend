@@ -1,5 +1,5 @@
-import { createContext, useState, useContext, useEffect } from 'react';
-import { authService } from '../services/api.js';  // 🔥 EXTENSÃO .js É OBRIGATÓRIA NO VITE
+import { createContext, useState, useContext, useEffect } from "react";
+import { authService } from "../services/api.js"; // 🔥 EXTENSÃO .js É OBRIGATÓRIA NO VITE
 
 // Criar o contexto
 const AuthContext = createContext({});
@@ -8,7 +8,7 @@ const AuthContext = createContext({});
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) {
-    throw new Error('useAuth deve ser usado dentro de um AuthProvider');
+    throw new Error("useAuth deve ser usado dentro de um AuthProvider");
   }
   return context;
 };
@@ -19,8 +19,8 @@ export const AuthProvider = ({ children }) => {
 
   // Carregar sessão salva
   useEffect(() => {
-    const storedUser = localStorage.getItem('user');
-    const storedToken = localStorage.getItem('token');
+    const storedUser = localStorage.getItem("user");
+    const storedToken = localStorage.getItem("token");
 
     if (storedUser && storedToken) {
       setUser(JSON.parse(storedUser));
@@ -33,31 +33,31 @@ export const AuthProvider = ({ children }) => {
     try {
       const data = await authService.login(email, senha);
 
-      localStorage.setItem('token', data.token);
-      localStorage.setItem('user', JSON.stringify(data.usuario));
+      localStorage.setItem("token", data.token);
+      localStorage.setItem("user", JSON.stringify(data.usuario));
 
       setUser(data.usuario);
       return { success: true };
     } catch (error) {
-      console.error('Erro no login:', error);
+      console.error("Erro no login:", error);
       return {
         success: false,
-        message: error.response?.data?.mensagem || 'Erro ao fazer login',
+        message: error.response?.data?.mensagem || "Erro ao fazer login",
       };
     }
   };
 
   // LOGOUT ---------------------------------------------------------
   const logout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
     setUser(null);
   };
 
   // CADASTRO ------------------------------------------------------
   const cadastrar = async (tipo, dados) => {
     try {
-      if (tipo === 'ALUNO') {
+      if (tipo === "ALUNO") {
         await authService.cadastrarAluno(dados);
       } else {
         await authService.cadastrarPersonal(dados);
@@ -65,10 +65,10 @@ export const AuthProvider = ({ children }) => {
 
       return { success: true };
     } catch (error) {
-      console.error('Erro no cadastro:', error);
+      console.error("Erro no cadastro:", error);
       return {
         success: false,
-        message: error.response?.data?.mensagem || 'Erro ao cadastrar',
+        message: error.response?.data?.mensagem || "Erro ao cadastrar",
       };
     }
   };
@@ -76,9 +76,9 @@ export const AuthProvider = ({ children }) => {
   // Regras de perfil ---------------------------------------------
   const isAuthenticated = () => !!user;
 
-  const isAluno = () => user?.tipo === 'ALUNO';
+  const isAluno = () => user?.tipo === "ALUNO";
 
-  const isPersonal = () => user?.tipo === 'PERSONAL';
+  const isPersonal = () => user?.tipo === "PERSONAL";
 
   // Provider --------------------------------------------------------
   return (
