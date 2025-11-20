@@ -274,4 +274,30 @@ export const suporteService = {
   },
 };
 
+// ============================================
+//  PERSONAL (NOVO)
+// ============================================
+export const personalService = {
+  // Lista alunos vinculados ao personal logado
+  listarAlunos: async (personalId) => {
+    const resp = await api.get(`/personal/${personalId}/alunos`);
+    return resp.data.data || [];
+  },
+
+  // Lista alunos sem personal (disponíveis para vínculo)
+  listarAlunosDisponiveis: async () => {
+    const resp = await api.get('/personal/alunos-disponiveis');
+    return resp.data.data || [];
+  },
+
+  // Vincular um aluno a um personal
+  vincularAluno: async ({ personalId, alunoId }) => {
+    const resp = await api.post('/personal/vincular-aluno', {
+      personalId,
+      alunoId,
+    });
+    return resp.data.data;
+  },
+};
+
 export default api;
