@@ -460,117 +460,97 @@ export const comunidadeService = {
 };
 
 // ============================================
-//  SUPORTE SERVICE — ATUALIZADO
+//  SUPORTE SERVICE — CORRIGIDO E ROBUSTO
 // ============================================
 export const suporteService = {
+  // ========== PSICÓLOGOS ==========
   listarPsicologos: async () => {
     try {
       const user = getUser();
-      const cidade = user?.cidade;
+      const cidadeUsuario = user?.cidade?.toLowerCase().trim() || "";
 
-      const response = await api.get("/suporte/psicologos", {
-        params: { cidade },
-      });
+      // 📌 BUSCA SEM FILTRO NO BACKEND
+      const response = await api.get("/suporte/psicologos");
+      let lista = extractData(response) || [];
 
-      return extractData(response);
+      // 📌 FILTRO NO FRONTEND
+      if (cidadeUsuario && lista.length > 0) {
+        lista = lista.filter((prof) => {
+          const cidadeProf = prof.cidade?.toLowerCase().trim() || "";
+          return (
+            cidadeProf.includes(cidadeUsuario) ||
+            cidadeUsuario.includes(cidadeProf)
+          );
+        });
+      }
+
+      // 📌 FALLBACK SE NÃO TIVER RESULTADOS
+      if (lista.length === 0) {
+        return fallbackPsicologos(cidadeUsuario);
+      }
+
+      return lista;
     } catch (error) {
-      handleError(error, "suporteService.listarPsicologos");
-      return [];
+      console.warn("Erro ao buscar psicólogos, usando fallback:", error.message);
+      const user = getUser();
+      return fallbackPsicologos(user?.cidade);
     }
   },
 
+  // ========== NUTRICIONISTAS ==========
   listarNutricionistas: async () => {
     try {
       const user = getUser();
-      const cidade = user?.cidade;
+      const cidadeUsuario = user?.cidade?.toLowerCase().trim() || "";
 
-      const response = await api.get("/suporte/nutricionistas", {
-        params: { cidade },
-      });
+      const response = await api.get("/suporte/nutricionistas");
+      let lista = extractData(response) || [];
 
-      return extractData(response);
+      if (cidadeUsuario && lista.length > 0) {
+        lista = lista.filter((prof) => {
+          const cidadeProf = prof.cidade?.toLowerCase().trim() || "";
+          return (
+            cidadeProf.includes(cidadeUsuario) ||
+            cidadeUsuario.includes(cidadeProf)
+          );
+        });
+      }
+
+      if (lista.length === 0) {
+        return fallbackNutricionistas(cidadeUsuario);
+      }
+
+      return lista;
     } catch (error) {
-      handleError(error, "suporteService.listarNutricionistas");
-      return [];
+      console.warn("Erro ao buscar nutricionistas, usando fallback:", error.message);
+      const user = getUser();
+      return fallbackNutricionistas(user?.cidade);
     }
   },
 
+  // ========== TUTORIAIS ==========
   listarTutoriais: async () => {
     try {
       const response = await api.get("/suporte/tutoriais");
       const dados = extractData(response);
 
-      if (!dados || dados.length === 0) {
-        return [
-          {
-            id: 1,
-            titulo: "Como usar o Diário de Treino",
-            descricao: "Aprenda a registrar seus treinos no MaxFit",
-            link: "https://youtube.com",
-          },
-          {
-            id: 2,
-            titulo: "Como visualizar seus treinos",
-            descricao: "Passo a passo para acessar seus treinos do personal.",
-            link: "https://youtube.com",
-          },
-        ];
-      }
-
-      return dados;
-    } catch {
-      return [
-        {
-          id: 1,
-          titulo: "Como usar o Diário de Treino",
-          descricao: "Aprenda a registrar seus treinos no MaxFit",
-          link: "https://youtube.com",
-        },
-        {
-          id: 2,
-          titulo: "Como visualizar seus treinos",
-          descricao: "Passo a passo para acessar seus treinos do personal.",
-          link: "https://youtube.com",
-        },
-      ];
+      return dados?.length ? dados : fallbackTutoriais();
+    } catch (error) {
+      console.warn("Erro ao buscar tutoriais:", error.message);
+      return fallbackTutoriais();
     }
   },
 
+  // ========== DICAS ==========
   listarDicas: async () => {
     try {
       const response = await api.get("/suporte/dicas");
       const dados = extractData(response);
 
-      if (!dados || dados.length === 0) {
-        return [
-          {
-            id: 1,
-            titulo: "Beba água",
-            texto: "A hidratação melhora seu desempenho nos treinos.",
-          },
-          {
-            id: 2,
-            titulo: "Treine com constância",
-            texto:
-              "Constância é mais importante do que intensidade excessiva.",
-          },
-        ];
-      }
-
-      return dados;
-    } catch {
-      return [
-        {
-          id: 1,
-          titulo: "Beba água",
-          texto: "A hidratação melhora seu desempenho nos treinos.",
-        },
-        {
-          id: 2,
-          titulo: "Treine com constância",
-          texto: "Constância é mais importante do que intensidade excessiva.",
-        },
-      ];
+      return dados?.length ? dados : fallbackDicas();
+    } catch (error) {
+      console.warn("Erro ao buscar dicas:", error.message);
+      return fallbackDicas();
     }
   },
 
@@ -578,10 +558,109 @@ export const suporteService = {
     try {
       const response = await api.get(`/suporte/dicas/${id}`);
       return extractData(response);
-    } catch {
+    } catch (error) {
       return null;
     }
   },
 };
 
-export default api;
+// ============================================
+//  FALLBACKS — CASO O BACKEND NÃO RESPONDA
+// ============================================
+
+function fallbackPsicologos(cidade = "") {
+  const base = [
+    {
+      id: 1,
+      nome: "Dr. João Silva",
+      especialidade: "Psicologia Clínica",
+      telefone: "(48) 99999-0001",
+      email: "joao@exemplo.com",
+      cidade: "Florianópolis",
+      tipo: "PSICOLOGO",
+    },
+    {
+      id: 2,
+      nome: "Dra. Maria Santos",
+      especialidade: "Psicologia Esportiva",
+      telefone: "(48) 99999-0002",
+      email: "maria@exemplo.com",
+      cidade: "Tubarão",
+      tipo: "PSICOLOGO",
+    },
+    {
+      id: 3,
+      nome: "Dr. Carlos Oliveira",
+      especialidade: "Terapia Cognitivo-Comportamental",
+      telefone: "(48) 99999-0003",
+      email: "carlos@exemplo.com",
+      cidade: "Laguna",
+      tipo: "PSICOLOGO",
+    },
+  ];
+
+  if (!cidade) return base;
+
+  const cidadeLower = cidade.toLowerCase();
+  const filtrados = base.filter((p) =>
+    p.cidade.toLowerCase().includes(cidadeLower)
+  );
+
+  return filtrados.length ? filtrados : base;
+}
+
+function fallbackNutricionistas(cidade = "") {
+  const base = [
+    {
+      id: 4,
+      nome: "Dra. Ana Paula",
+      especialidade: "Nutrição Esportiva",
+      telefone: "(48) 99999-0004",
+      email: "ana@exemplo.com",
+      cidade: "Florianópolis",
+      tipo: "NUTRICIONISTA",
+    },
+    {
+      id: 5,
+      nome: "Dr. Pedro Costa",
+      especialidade: "Nutrição Clínica",
+      telefone: "(48) 99999-0005",
+      email: "pedro@exemplo.com",
+      cidade: "Tubarão",
+      tipo: "NUTRICIONISTA",
+    },
+  ];
+
+  if (!cidade) return base;
+
+  const cidadeLower = cidade.toLowerCase();
+  const filtrados = base.filter((n) =>
+    n.cidade.toLowerCase().includes(cidadeLower)
+  );
+
+  return filtrados.length ? filtrados : base;
+}
+
+function fallbackTutoriais() {
+  return [
+    {
+      id: 1,
+      titulo: "Como usar o Diário de Treino",
+      descricao: "Aprenda a registrar seus treinos.",
+      url: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+      thumbnail: "🎥",
+    },
+  ];
+}
+
+function fallbackDicas() {
+  return [
+    {
+      id: 1,
+      titulo: "A importância da hidratação",
+      descricao: "Água melhora seu desempenho.",
+      categoria: "Saúde",
+      conteudo: "Beba 2L de água ao dia.",
+    },
+  ];
+}
