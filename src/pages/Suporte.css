@@ -1,39 +1,49 @@
+/* Container geral da página */
 .suporte-container {
-  padding: 20px;
-  margin-top: 90px; /* AFASTA DO HEADER */
+  padding: 16px;
+  margin-top: 90px;
+  max-width: 480px;  /* largura típica de celular */
+  margin-left: auto;
+  margin-right: auto;
 }
 
+/* Abas empilhadas e centralizadas */
 .abas-container {
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  margin-bottom: 20px;
+  gap: 10px;
 }
 
-/* Botões das abas */
+/* Aba padrão */
 .aba {
+  width: 100%;
   padding: 12px;
   border-radius: 12px;
   border: 2px solid #ff914d;
   background: #fff5ee;
   font-weight: 600;
   text-align: center;
-  font-size: 16px;
+  font-size: 15px;
   cursor: pointer;
+  transition: 0.2s;
 }
 
+/* Aba ativa */
 .aba.ativa {
   background: #ff914d;
   color: white;
 }
 
-/* Cards dos profissionais */
+/* Conteúdo dos cards */
 .cardSuporte {
   background: white;
-  padding: 18px;
-  margin-bottom: 18px;
-  border-radius: 14px;
-  box-shadow: 0px 2px 6px rgba(0,0,0,0.1);
+  padding: 16px;
+  margin-top: 14px;
+  border-radius: 12px;
+  box-shadow: 0px 3px 8px rgba(0,0,0,0.12);
+  max-width: 480px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 /* Loader */
@@ -41,14 +51,30 @@
   border: 4px solid #ffd6b5;
   border-top: 4px solid #ff6a00;
   border-radius: 50%;
-  width: 35px;
-  height: 35px;
+  width: 30px;
+  height: 30px;
   animation: spin 1s linear infinite;
   margin: auto;
-  margin-top: 20px;
+  margin-top: 30px;
 }
 
 @keyframes spin {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
+}
+
+/* 📱 MOBILE FIRST */
+@media (max-width: 480px) {
+  .suporte-container {
+    padding: 12px;
+  }
+
+  .aba {
+    font-size: 14px;
+    padding: 10px;
+  }
+
+  .cardSuporte {
+    padding: 14px;
+  }
 }
