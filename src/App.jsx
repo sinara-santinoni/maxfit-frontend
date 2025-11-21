@@ -14,7 +14,7 @@ import Desafios from './pages/Desafios';
 import Comunidade from './pages/Comunidade';
 import Suporte from './pages/Suporte';
 import SuportePsicologico from './pages/SuportePsicologico';
-import SuporteNutricional from './pages/SuporteNutricional';
+import SuporteNutricionista from './pages/SuporteNutricionista';
 import SuporteTutoriais from './pages/SuporteTutoriais';
 import SuporteDicas from './pages/SuporteDicas';
 import MeuProgresso from './pages/MeuProgresso';
@@ -123,7 +123,7 @@ function App() {
             path="/suporte/nutricionista"
             element={
               <PrivateRoute>
-                <SuporteNutricional />
+                <SuporteNutricionista />
               </PrivateRoute>
             }
           />
