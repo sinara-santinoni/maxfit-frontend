@@ -2,35 +2,30 @@ import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import Header from "../components/Header";
 import BottomNav from "../components/BottomNav";
-import { personalService } from "../services/api";
+import { usuarioService } from "../services/api"; // 🔥 AGORA O SERVICE CERTO
 import { useEffect, useState } from "react";
 
 const HomePersonal = () => {
-  const { user, personalReload } = useAuth(); // 🔥 agora escutamos o reload
+  const { user } = useAuth();
   const navigate = useNavigate();
 
   const [totalAlunos, setTotalAlunos] = useState(0);
 
-  /**
-   * Carrega a quantidade de alunos vinculados ao personal
-   */
+  useEffect(() => {
+    if (user?.id) carregarResumo();
+  }, [user]);
+
   const carregarResumo = async () => {
     try {
-      const alunos = await personalService.listarAlunosDoPersonal(user.id);
+      // 🔥 AGORA CHAMA O ENDPOINT REAL DO BACKEND
+      const alunos = await usuarioService.buscarAlunosDoPersonal(user.id);
+
       setTotalAlunos(alunos?.length || 0);
     } catch (error) {
       console.error("Erro ao carregar resumo do personal:", error);
     }
   };
 
-  // Carrega ao abrir a tela OU quando o personal adicionar um aluno
-  useEffect(() => {
-    if (user?.id) carregarResumo();
-  }, [user, personalReload]); // 🔥 recarrega automaticamente
-
-  // ============================================
-  // MENU DO PERSONAL
-  // ============================================
   const menuItems = [
     {
       title: "Adicionar Treino",
@@ -74,7 +69,6 @@ const HomePersonal = () => {
       <Header title="MaxFit Pro" />
 
       <main className="pt-20 px-4 max-w-md mx-auto">
-        {/* CARD DE BOAS-VINDAS */}
         <div className="bg-gradient-to-r from-secondary to-primary rounded-2xl p-6 mb-6 text-white shadow-lg">
           <h2 className="text-2xl font-bold mb-2">
             Olá, {user?.nome?.split(" ")[0]}! 👨‍🏫
@@ -82,7 +76,6 @@ const HomePersonal = () => {
           <p className="text-white/90">Pronto para treinar seus alunos hoje?</p>
         </div>
 
-        {/* ESTATÍSTICAS */}
         <div className="grid grid-cols-3 gap-3 mb-6">
           <div className="bg-white rounded-xl p-4 shadow-md text-center">
             <p className="text-2xl font-bold text-primary">{totalAlunos}</p>
@@ -100,7 +93,6 @@ const HomePersonal = () => {
           </div>
         </div>
 
-        {/* MENU DO PERSONAL */}
         <div className="grid grid-cols-2 gap-4">
           {menuItems.map((item, index) => (
             <button
