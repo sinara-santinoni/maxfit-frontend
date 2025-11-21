@@ -26,6 +26,9 @@ import HomePersonal from './pages/HomePersonal';
 import AdicionarAluno from './pages/AdicionarAluno';
 import MeusAlunos from './pages/MeusAlunos';
 
+// 🆕 IMPORTA A NOVA TELA DE TREINO (ADICIONADO AGORA)
+import CriarTreino from './pages/CriarTreino';
+
 /**
  * Redirecionamento inicial
  */
@@ -50,6 +53,7 @@ function App() {
     <BrowserRouter>
       <AuthProvider>
         <Routes>
+
           {/* Rota inicial */}
           <Route path="/" element={<RedirectHome />} />
 
@@ -113,7 +117,7 @@ function App() {
             }
           />
 
-          {/* 👉 SUBPÁGINAS DO SUPORTE */}
+          {/* 👉 Subpáginas do suporte */}
           <Route
             path="/suporte/psicologico"
             element={
@@ -189,8 +193,19 @@ function App() {
             }
           />
 
+          {/* 🆕 ROTA NOVA → CRIAR TREINO */}
+          <Route
+            path="/criar-treino"
+            element={
+              <PrivateRoute requiredType="PERSONAL">
+                <CriarTreino />
+              </PrivateRoute>
+            }
+          />
+
           {/* 404 */}
           <Route path="*" element={<Navigate to="/" replace />} />
+
         </Routes>
       </AuthProvider>
     </BrowserRouter>
