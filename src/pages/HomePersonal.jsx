@@ -2,7 +2,7 @@ import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import Header from "../components/Header";
 import BottomNav from "../components/BottomNav";
-import { usuarioService } from "../services/api"; // 🔥 AGORA O SERVICE CERTO
+import { personalService, treinoService, desafioService } from "../services/api";
 import { useEffect, useState } from "react";
 
 const HomePersonal = () => {
@@ -10,22 +10,42 @@ const HomePersonal = () => {
   const navigate = useNavigate();
 
   const [totalAlunos, setTotalAlunos] = useState(0);
+  const [totalTreinos, setTotalTreinos] = useState(0);
+  const [totalDesafios, setTotalDesafios] = useState(0);
 
   useEffect(() => {
-    if (user?.id) carregarResumo();
+    if (user?.id) {
+      carregarResumo();
+    }
   }, [user]);
 
+  /**
+   * Carrega:
+   * - quantos alunos estão vinculados a esse personal
+   * - quantos treinos existem
+   * - quantos desafios existem
+   */
   const carregarResumo = async () => {
     try {
-      // 🔥 AGORA CHAMA O ENDPOINT REAL DO BACKEND
-      const alunos = await usuarioService.buscarAlunosDoPersonal(user.id);
-
+      // 1) Alunos do personal
+      const alunos = await personalService.listarAlunosDoPersonal(user.id);
       setTotalAlunos(alunos?.length || 0);
+
+      // 2) Todos os treinos cadastrados no sistema
+      const treinos = await treinoService.listarTodos();
+      setTotalTreinos(treinos?.length || 0);
+
+      // 3) Todos os desafios cadastrados
+      const desafios = await desafioService.listarDesafios();
+      setTotalDesafios(desafios?.length || 0);
     } catch (error) {
       console.error("Erro ao carregar resumo do personal:", error);
     }
   };
 
+  // ============================================
+  // MENUS DO PERSONAL
+  // ============================================
   const menuItems = [
     {
       title: "Adicionar Treino",
@@ -69,6 +89,7 @@ const HomePersonal = () => {
       <Header title="MaxFit Pro" />
 
       <main className="pt-20 px-4 max-w-md mx-auto">
+        {/* CARD DE BOAS-VINDAS */}
         <div className="bg-gradient-to-r from-secondary to-primary rounded-2xl p-6 mb-6 text-white shadow-lg">
           <h2 className="text-2xl font-bold mb-2">
             Olá, {user?.nome?.split(" ")[0]}! 👨‍🏫
@@ -76,6 +97,7 @@ const HomePersonal = () => {
           <p className="text-white/90">Pronto para treinar seus alunos hoje?</p>
         </div>
 
+        {/* ESTATÍSTICAS */}
         <div className="grid grid-cols-3 gap-3 mb-6">
           <div className="bg-white rounded-xl p-4 shadow-md text-center">
             <p className="text-2xl font-bold text-primary">{totalAlunos}</p>
@@ -83,16 +105,17 @@ const HomePersonal = () => {
           </div>
 
           <div className="bg-white rounded-xl p-4 shadow-md text-center">
-            <p className="text-2xl font-bold text-green-500">8</p>
+            <p className="text-2xl font-bold text-green-500">{totalTreinos}</p>
             <p className="text-xs text-gray-600">Treinos</p>
           </div>
 
           <div className="bg-white rounded-xl p-4 shadow-md text-center">
-            <p className="text-2xl font-bold text-blue-500">3</p>
+            <p className="text-2xl font-bold text-blue-500">{totalDesafios}</p>
             <p className="text-xs text-gray-600">Desafios</p>
           </div>
         </div>
 
+        {/* MENU DO PERSONAL */}
         <div className="grid grid-cols-2 gap-4">
           {menuItems.map((item, index) => (
             <button
