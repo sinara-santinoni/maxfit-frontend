@@ -20,7 +20,8 @@ const BottomNav = () => {
   // Links para personal
   const personalLinks = [
     { path: '/home-personal', icon: '🏠', label: 'Início' },
-    { path: '/gerenciar-alunos', icon: '👥', label: 'Alunos' },
+    // 👉 AGORA APONTA PARA A PÁGINA "MEUS ALUNOS"
+    { path: '/personal/alunos', icon: '👥', label: 'Alunos' },
     { path: '/criar-treino', icon: '📝', label: 'Treinos' },
     { path: '/desafios', icon: '🏆', label: 'Desafios' },
     { path: '/comunidade', icon: '💬', label: 'Comunidade' },
