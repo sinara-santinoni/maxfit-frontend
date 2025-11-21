@@ -2,13 +2,12 @@ import { Navigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
 /**
- * Componente para proteger rotas que exigem autenticação
- * Se o usuário não estiver logado, redireciona para o login
+ * Protege rotas que exigem login e/ou tipo de usuário (ALUNO / PERSONAL)
  */
 const PrivateRoute = ({ children, requiredType }) => {
   const { isAuthenticated, user, loading } = useAuth();
 
-  // Enquanto carrega, mostrar nada (ou um spinner)
+  // Enquanto o app está validando o login
   if (loading) {
     return (
       <div className="flex items-center justify-center h-screen">
@@ -17,17 +16,26 @@ const PrivateRoute = ({ children, requiredType }) => {
     );
   }
 
-  // Se não estiver autenticado, redirecionar para login
+  // Se não estiver autenticado → volta pro login
   if (!isAuthenticated()) {
     return <Navigate to="/login" replace />;
   }
 
-  // Se exigir um tipo específico de usuário e o tipo não bater, redirecionar
-  if (requiredType && user.tipo !== requiredType) {
-    return <Navigate to="/" replace />;
+  // Segurança extra: se o user ainda estiver null (caso raro)
+  if (!user) {
+    return <Navigate to="/login" replace />;
   }
 
-  // Se tudo ok, renderizar o componente filho
+  // Caso o tipo obrigatório não bata (ALUNO / PERSONAL)
+  if (requiredType) {
+    const tipoNormalizado = (user.tipo || '').trim().toUpperCase();
+
+    if (tipoNormalizado !== requiredType.toUpperCase()) {
+      return <Navigate to="/" replace />;
+    }
+  }
+
+  // Tudo certo → libera acesso
   return children;
 };
 
