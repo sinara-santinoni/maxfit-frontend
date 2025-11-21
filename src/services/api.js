@@ -8,14 +8,13 @@ const API_BASE_URL = "https://max-fit-api-4bkb.onrender.com/api";
 const api = axios.create({
   baseURL: API_BASE_URL,
   headers: { "Content-Type": "application/json" },
-  timeout: 30000, // 30s
+  timeout: 30000,
 });
 
 // ============================================
 //  INTERCEPTORS
 // ============================================
 
-// Request interceptor - adiciona token
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem("token");
@@ -25,7 +24,6 @@ api.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-// Response interceptor - tratamento global
 api.interceptors.response.use(
   (response) => response,
   (error) => {
@@ -428,7 +426,9 @@ export const comunidadeService = {
       const response = await api.post(
         `/comunidade/${postagemId}/curtir`,
         null,
-        { params: { usuarioId: user?.id } }
+        {
+          params: { usuarioId: user?.id },
+        }
       );
       return extractData(response);
     } catch (error) {
@@ -460,48 +460,117 @@ export const comunidadeService = {
 };
 
 // ============================================
-//  SUPORTE SERVICE
+//  SUPORTE SERVICE — ATUALIZADO
 // ============================================
 export const suporteService = {
-  listarPsicologos: async (cidade) => {
+  listarPsicologos: async () => {
     try {
-      if (!cidade) cidade = getUser()?.cidade;
+      const user = getUser();
+      const cidade = user?.cidade;
+
       const response = await api.get("/suporte/psicologos", {
         params: { cidade },
       });
+
       return extractData(response);
     } catch (error) {
       handleError(error, "suporteService.listarPsicologos");
+      return [];
     }
   },
 
-  listarNutricionistas: async (cidade) => {
+  listarNutricionistas: async () => {
     try {
-      if (!cidade) cidade = getUser()?.cidade;
+      const user = getUser();
+      const cidade = user?.cidade;
+
       const response = await api.get("/suporte/nutricionistas", {
         params: { cidade },
       });
+
       return extractData(response);
     } catch (error) {
       handleError(error, "suporteService.listarNutricionistas");
+      return [];
     }
   },
 
   listarTutoriais: async () => {
     try {
       const response = await api.get("/suporte/tutoriais");
-      return extractData(response);
+      const dados = extractData(response);
+
+      if (!dados || dados.length === 0) {
+        return [
+          {
+            id: 1,
+            titulo: "Como usar o Diário de Treino",
+            descricao: "Aprenda a registrar seus treinos no MaxFit",
+            link: "https://youtube.com",
+          },
+          {
+            id: 2,
+            titulo: "Como visualizar seus treinos",
+            descricao: "Passo a passo para acessar seus treinos do personal.",
+            link: "https://youtube.com",
+          },
+        ];
+      }
+
+      return dados;
     } catch {
-      return [];
+      return [
+        {
+          id: 1,
+          titulo: "Como usar o Diário de Treino",
+          descricao: "Aprenda a registrar seus treinos no MaxFit",
+          link: "https://youtube.com",
+        },
+        {
+          id: 2,
+          titulo: "Como visualizar seus treinos",
+          descricao: "Passo a passo para acessar seus treinos do personal.",
+          link: "https://youtube.com",
+        },
+      ];
     }
   },
 
   listarDicas: async () => {
     try {
       const response = await api.get("/suporte/dicas");
-      return extractData(response);
+      const dados = extractData(response);
+
+      if (!dados || dados.length === 0) {
+        return [
+          {
+            id: 1,
+            titulo: "Beba água",
+            texto: "A hidratação melhora seu desempenho nos treinos.",
+          },
+          {
+            id: 2,
+            titulo: "Treine com constância",
+            texto:
+              "Constância é mais importante do que intensidade excessiva.",
+          },
+        ];
+      }
+
+      return dados;
     } catch {
-      return [];
+      return [
+        {
+          id: 1,
+          titulo: "Beba água",
+          texto: "A hidratação melhora seu desempenho nos treinos.",
+        },
+        {
+          id: 2,
+          titulo: "Treine com constância",
+          texto: "Constância é mais importante do que intensidade excessiva.",
+        },
+      ];
     }
   },
 
