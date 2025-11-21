@@ -26,46 +26,32 @@ const HomePersonal = () => {
 
   const menuItems = [
     {
-      title: "Meus Alunos",
-      icon: "👥",
-      description: "Gerenciar lista de alunos",
-      path: "/personal/alunos",
-      color: "bg-blue-500",
-    },
-    {
-      title: "Criar Treino",
+      title: "Adicionar Treino",
       icon: "📝",
-      description: "Montar novos treinos",
+      description: "Criar um novo treino para um aluno",
       path: "/criar-treino",
       color: "bg-orange-500",
     },
     {
-      title: "Progresso",
-      icon: "📊",
-      description: "Acompanhar evolução dos alunos",
-      path: "/progresso-alunos",
+      title: "Agendar Lembrete",
+      icon: "⏰",
+      description: "Criar e programar lembretes para alunos",
+      path: "/lembretes",
+      color: "bg-blue-500",
+    },
+    {
+      title: "Adicionar Novo Aluno",
+      icon: "👤",
+      description: "Cadastrar um aluno ao personal ou fazer vínculo",
+      path: "/gerenciar-alunos",
       color: "bg-green-500",
     },
     {
-      title: "Desafios",
-      icon: "🏆",
-      description: "Criar desafios para alunos",
-      path: "/criar-desafio",
-      color: "bg-yellow-500",
-    },
-    {
-      title: "Comunidade",
+      title: "Criar Postagem",
       icon: "💬",
-      description: "Interagir com a comunidade",
+      description: "Publicar conteúdo na comunidade",
       path: "/comunidade",
       color: "bg-purple-500",
-    },
-    {
-      title: "Mensagens",
-      icon: "✉️",
-      description: "Conversar com alunos",
-      path: "/mensagens",
-      color: "bg-pink-500",
     },
   ];
 
