@@ -2,7 +2,7 @@ import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import Header from "../components/Header";
 import BottomNav from "../components/BottomNav";
-import { personalService, treinoService, desafioService } from "../services/api";
+import { personalService, desafioService } from "../services/api";
 import { useEffect, useState } from "react";
 
 const HomePersonal = () => {
@@ -10,34 +10,35 @@ const HomePersonal = () => {
   const navigate = useNavigate();
 
   const [totalAlunos, setTotalAlunos] = useState(0);
-  const [totalTreinos, setTotalTreinos] = useState(0);
   const [totalDesafios, setTotalDesafios] = useState(0);
 
   useEffect(() => {
-    if (user?.id) {
-      carregarResumo();
-    }
+    if (user?.id) carregarResumo();
   }, [user]);
 
   /**
    * Carrega:
-   * - quantos alunos estão vinculados a esse personal
-   * - quantos treinos existem
-   * - quantos desafios existem
+   *  - quantidade de alunos vinculados ao personal
+   *  - quantidade de desafios criados por esse usuário
    */
   const carregarResumo = async () => {
     try {
-      // 1) Alunos do personal
-      const alunos = await personalService.listarAlunosDoPersonal(user.id);
+      const [alunos, desafios] = await Promise.all([
+        personalService.listarAlunos(user.id),
+        desafioService.listarDesafios(),
+      ]);
+
+      // alunos vinculados
       setTotalAlunos(alunos?.length || 0);
 
-      // 2) Todos os treinos cadastrados no sistema
-      const treinos = await treinoService.listarTodos();
-      setTotalTreinos(treinos?.length || 0);
+      // desafios criados por esse usuário (tentamos cobrir os campos mais comuns)
+      const meusDesafios = (desafios || []).filter((d) =>
+        d.criadorId === user.id ||
+        d.alunoId === user.id ||
+        d.criador?.id === user.id
+      );
 
-      // 3) Todos os desafios cadastrados
-      const desafios = await desafioService.listarDesafios();
-      setTotalDesafios(desafios?.length || 0);
+      setTotalDesafios(meusDesafios.length);
     } catch (error) {
       console.error("Erro ao carregar resumo do personal:", error);
     }
@@ -104,11 +105,13 @@ const HomePersonal = () => {
             <p className="text-xs text-gray-600">Alunos</p>
           </div>
 
+          {/* Treinos — por enquanto ilustrativo */}
           <div className="bg-white rounded-xl p-4 shadow-md text-center">
-            <p className="text-2xl font-bold text-green-500">{totalTreinos}</p>
+            <p className="text-2xl font-bold text-green-500">8</p>
             <p className="text-xs text-gray-600">Treinos</p>
           </div>
 
+          {/* Desafios — agora real, baseado na API */}
           <div className="bg-white rounded-xl p-4 shadow-md text-center">
             <p className="text-2xl font-bold text-blue-500">{totalDesafios}</p>
             <p className="text-xs text-gray-600">Desafios</p>
