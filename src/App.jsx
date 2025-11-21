@@ -13,14 +13,17 @@ import DiarioTreino from './pages/DiarioTreino';
 import Desafios from './pages/Desafios';
 import Comunidade from './pages/Comunidade';
 import Suporte from './pages/Suporte';
-import MeuProgresso from './pages/MeuProgresso'; // 🌟 Meu Progresso
+import SuportePsicologico from './pages/SuportePsicologico';
+import SuporteNutricional from './pages/SuporteNutricional';
+import SuporteTutoriais from './pages/SuporteTutoriais';
+import SuporteDicas from './pages/SuporteDicas';
+import MeuProgresso from './pages/MeuProgresso';
 
 // Páginas do personal
 import HomePersonal from './pages/HomePersonal';
 
 /**
- * Componente de redirecionamento inicial
- * Redireciona para a home correta conforme o tipo de usuário
+ * Redirecionamento inicial
  */
 function RedirectHome() {
   const { user, isAuthenticated } = useAuth();
@@ -43,14 +46,14 @@ function App() {
     <BrowserRouter>
       <AuthProvider>
         <Routes>
-          {/* Rota inicial - redireciona conforme autenticação */}
+          {/* Rota inicial */}
           <Route path="/" element={<RedirectHome />} />
 
           {/* Rotas públicas */}
           <Route path="/login" element={<Login />} />
           <Route path="/cadastro" element={<Cadastro />} />
 
-          {/* Rotas protegidas do ALUNO */}
+          {/* Rotas protegidas do aluno */}
           <Route
             path="/home-aluno"
             element={
@@ -59,6 +62,7 @@ function App() {
               </PrivateRoute>
             }
           />
+
           <Route
             path="/treinos"
             element={
@@ -67,6 +71,7 @@ function App() {
               </PrivateRoute>
             }
           />
+
           <Route
             path="/diario"
             element={
@@ -75,6 +80,7 @@ function App() {
               </PrivateRoute>
             }
           />
+
           <Route
             path="/desafios"
             element={
@@ -83,6 +89,7 @@ function App() {
               </PrivateRoute>
             }
           />
+
           <Route
             path="/comunidade"
             element={
@@ -91,6 +98,8 @@ function App() {
               </PrivateRoute>
             }
           />
+
+          {/* 👉 Suporte principal */}
           <Route
             path="/suporte"
             element={
@@ -100,7 +109,44 @@ function App() {
             }
           />
 
-          {/* 🌟 ROTA: MEU PROGRESSO (ALUNO) */}
+          {/* 👉 SUBPÁGINAS DO SUPORTE */}
+          <Route
+            path="/suporte/psicologico"
+            element={
+              <PrivateRoute>
+                <SuportePsicologico />
+              </PrivateRoute>
+            }
+          />
+
+          <Route
+            path="/suporte/nutricionista"
+            element={
+              <PrivateRoute>
+                <SuporteNutricional />
+              </PrivateRoute>
+            }
+          />
+
+          <Route
+            path="/suporte/tutoriais"
+            element={
+              <PrivateRoute>
+                <SuporteTutoriais />
+              </PrivateRoute>
+            }
+          />
+
+          <Route
+            path="/suporte/dicas"
+            element={
+              <PrivateRoute>
+                <SuporteDicas />
+              </PrivateRoute>
+            }
+          />
+
+          {/* Meu progresso */}
           <Route
             path="/progresso"
             element={
@@ -110,7 +156,7 @@ function App() {
             }
           />
 
-          {/* Rotas protegidas do PERSONAL */}
+          {/* Personal */}
           <Route
             path="/home-personal"
             element={
@@ -120,7 +166,7 @@ function App() {
             }
           />
 
-          {/* Rota 404 - página não encontrada */}
+          {/* 404 */}
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </AuthProvider>
