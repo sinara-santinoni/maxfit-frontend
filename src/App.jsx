@@ -22,6 +22,10 @@ import MeuProgresso from './pages/MeuProgresso';
 // Páginas do personal
 import HomePersonal from './pages/HomePersonal';
 
+// 🟧 IMPORTA AS NOVAS PÁGINAS DO PERSONAL
+import AdicionarAluno from './pages/AdicionarAluno';
+import MeusAlunos from './pages/MeusAlunos';
+
 /**
  * Redirecionamento inicial
  */
@@ -162,6 +166,25 @@ function App() {
             element={
               <PrivateRoute requiredType="PERSONAL">
                 <HomePersonal />
+              </PrivateRoute>
+            }
+          />
+
+          {/* 🟧 NOVAS ROTAS DO PERSONAL */}
+          <Route
+            path="/personal/adicionar-aluno"
+            element={
+              <PrivateRoute requiredType="PERSONAL">
+                <AdicionarAluno />
+              </PrivateRoute>
+            }
+          />
+
+          <Route
+            path="/personal/alunos"
+            element={
+              <PrivateRoute requiredType="PERSONAL">
+                <MeusAlunos />
               </PrivateRoute>
             }
           />

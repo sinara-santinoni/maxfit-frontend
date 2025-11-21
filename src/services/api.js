@@ -664,3 +664,41 @@ function fallbackDicas() {
     },
   ];
 }
+// ============================================
+//  GESTÃO DE ALUNOS — APENAS PARA O PERSONAL
+//  (NOVO - NÃO ALTERA NADA DO ALUNO)
+// ============================================
+
+export const alunoPersonalService = {
+  
+  // 1 — Lista TODOS os alunos cadastrados no MaxFit
+  listarTodos: async () => {
+    try {
+      const response = await api.get("/alunos");
+      return extractData(response);
+    } catch (error) {
+      handleError(error, "alunoPersonalService.listarTodos");
+    }
+  },
+
+  // 2 — Lista os alunos que estão vinculados ao personal logado
+  listarVinculados: async (personalId) => {
+    try {
+      const response = await api.get(`/alunos/personal/${personalId}`);
+      return extractData(response);
+    } catch (error) {
+      handleError(error, "alunoPersonalService.listarVinculados");
+    }
+  },
+
+  // 3 — Vincular um aluno ao personal
+  vincular: async (personalId, alunoId) => {
+    try {
+      const payload = { personalId, alunoId };
+      const response = await api.post("/usuario/vincular", payload);
+      return extractData(response);
+    } catch (error) {
+      handleError(error, "alunoPersonalService.vincular");
+    }
+  },
+};

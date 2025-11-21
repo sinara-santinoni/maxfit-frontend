@@ -15,6 +15,10 @@ const HomePersonal = () => {
     if (user?.id) carregarResumo();
   }, [user]);
 
+  /**
+   * Carrega a quantidade de alunos vinculados ao personal
+   * GET /api/alunos/personal/{idPersonal}
+   */
   const carregarResumo = async () => {
     try {
       const alunos = await personalService.listarAlunos(user.id);
@@ -24,6 +28,9 @@ const HomePersonal = () => {
     }
   };
 
+  // ============================================
+  // MENUS DO PERSONAL – atualizado conforme pedido
+  // ============================================
   const menuItems = [
     {
       title: "Adicionar Treino",
@@ -39,13 +46,25 @@ const HomePersonal = () => {
       path: "/lembretes",
       color: "bg-blue-500",
     },
+
+    // 🔥 NOVO → vai para tela de adicionar aluno (lista todos)
     {
       title: "Adicionar Novo Aluno",
       icon: "👤",
-      description: "Cadastrar um aluno ao personal ou fazer vínculo",
-      path: "/gerenciar-alunos",
+      description: "Vincular um aluno do MaxFit ao personal",
+      path: "/personal/adicionar-aluno",
       color: "bg-green-500",
     },
+
+    // 🧡 NOVO → ver apenas alunos vinculados ao personal
+    {
+      title: "Meus Alunos",
+      icon: "📚",
+      description: "Lista de alunos já vinculados",
+      path: "/personal/alunos",
+      color: "bg-yellow-500",
+    },
+
     {
       title: "Criar Postagem",
       icon: "💬",
@@ -60,7 +79,7 @@ const HomePersonal = () => {
       <Header title="MaxFit Pro" />
 
       <main className="pt-20 px-4 max-w-md mx-auto">
-        {/* WELCOME CARD */}
+        {/* CARD DE BOAS-VINDAS */}
         <div className="bg-gradient-to-r from-secondary to-primary rounded-2xl p-6 mb-6 text-white shadow-lg">
           <h2 className="text-2xl font-bold mb-2">
             Olá, {user?.nome?.split(" ")[0]}! 👨‍🏫
@@ -86,7 +105,7 @@ const HomePersonal = () => {
           </div>
         </div>
 
-        {/* MENU GRID */}
+        {/* MENU DO PERSONAL */}
         <div className="grid grid-cols-2 gap-4">
           {menuItems.map((item, index) => (
             <button
