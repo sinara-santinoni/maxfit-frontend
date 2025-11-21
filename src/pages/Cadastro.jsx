@@ -16,7 +16,7 @@ const Cadastro = () => {
     confirmarSenha: "",
     telefone: "",
     dataNascimento: "",
-    cidade: "", // 👈 NOVO CAMPO
+    cidade: "",
 
     peso: "",
     altura: "",
@@ -28,6 +28,21 @@ const Cadastro = () => {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
+  // 🔹 Atualiza campos do formulário
+  const handleChange = (e) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value,
+    });
+  };
+
+  // 🔹 Botão "Sou aluno" / "Sou personal"
+  const handleEscolherTipo = (escolha) => {
+    setTipo(escolha); // define o tipo
+    setPasso(2);      // avança para o formulário
+  };
+
+  // 🔹 Submit do formulário
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
@@ -57,14 +72,13 @@ const Cadastro = () => {
       return;
     }
 
-    // objetivo obrigatório para aluno (opcional)
     if (tipo === "ALUNO" && !formData.objetivo) {
       setError("Selecione um objetivo");
       setLoading(false);
       return;
     }
 
-    // monta objeto para o backend
+    // 🔹 cria objeto para enviar ao backend
     const dadosCadastro = {
       nome: formData.nome,
       email: formData.email,
@@ -103,6 +117,8 @@ const Cadastro = () => {
         </div>
 
         <div className="bg-white rounded-2xl shadow-xl p-8">
+
+          {/* ---------------- PASSO 1 ---------------- */}
           {passo === 1 && (
             <>
               <h2 className="text-2xl font-bold text-dark mb-6 text-center">
@@ -150,6 +166,7 @@ const Cadastro = () => {
             </>
           )}
 
+          {/* ---------------- PASSO 2 ---------------- */}
           {passo === 2 && (
             <>
               <button
@@ -170,6 +187,7 @@ const Cadastro = () => {
               )}
 
               <form onSubmit={handleSubmit} className="space-y-4">
+                
                 {/* Nome */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -228,7 +246,7 @@ const Cadastro = () => {
                   />
                 </div>
 
-                {/* Confirmar senha */}
+                {/* Confirmar Senha */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Confirmar senha *
@@ -256,7 +274,7 @@ const Cadastro = () => {
                   />
                 </div>
 
-                {/* Data nascimento */}
+                {/* Data de nascimento */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Data de nascimento
@@ -313,13 +331,9 @@ const Cadastro = () => {
                       >
                         <option value="">Selecione...</option>
                         <option value="PERDER_PESO">Perder peso</option>
-                        <option value="GANHAR_MASSA">
-                          Ganhar massa muscular
-                        </option>
+                        <option value="GANHAR_MASSA">Ganhar massa muscular</option>
                         <option value="MANTER_FORMA">Manter a forma</option>
-                        <option value="CONDICIONAMENTO">
-                          Melhorar condicionamento
-                        </option>
+                        <option value="CONDICIONAMENTO">Melhorar condicionamento</option>
                       </select>
                     </div>
                   </>
