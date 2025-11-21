@@ -7,7 +7,9 @@ import { useAuth } from '../context/AuthContext';
 
 const AdicionarAluno = () => {
   const navigate = useNavigate();
-  const { user } = useAuth();
+
+  // Agora usamos também triggerPersonalReload()
+  const { user, triggerPersonalReload } = useAuth();
 
   const [alunosDisponiveis, setAlunosDisponiveis] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -47,8 +49,12 @@ const AdicionarAluno = () => {
 
       alert("🎉 Aluno vinculado com sucesso!");
 
-      // Remove aluno da lista
+      // Remove da lista
       setAlunosDisponiveis((prev) => prev.filter((a) => a.id !== alunoId));
+
+      // 🔥 ATUALIZA A HOME DO PERSONAL AUTOMATICAMENTE
+      triggerPersonalReload();
+
     } catch (error) {
       console.error('Erro ao vincular aluno:', error);
       setErro('Erro ao vincular aluno. Tente novamente.');
@@ -126,6 +132,7 @@ const AdicionarAluno = () => {
                 className="bg-white rounded-xl shadow-md p-4 hover:shadow-lg transition-shadow"
               >
                 <div className="flex items-center gap-4">
+                  
                   <div className="w-14 h-14 bg-gradient-to-br from-primary to-secondary rounded-full flex items-center justify-center text-white font-bold text-xl">
                     {aluno.nome.charAt(0).toUpperCase()}
                   </div>
@@ -156,6 +163,7 @@ const AdicionarAluno = () => {
                       '+ Adicionar'
                     )}
                   </button>
+
                 </div>
               </div>
             ))}

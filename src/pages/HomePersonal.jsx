@@ -6,32 +6,30 @@ import { personalService } from "../services/api";
 import { useEffect, useState } from "react";
 
 const HomePersonal = () => {
-  const { user } = useAuth();
+  const { user, personalReload } = useAuth(); // 🔥 agora escutamos o reload
   const navigate = useNavigate();
 
   const [totalAlunos, setTotalAlunos] = useState(0);
 
-  useEffect(() => {
-    if (user?.id) carregarResumo();
-  }, [user]);
-
   /**
    * Carrega a quantidade de alunos vinculados ao personal
-   * GET /api/alunos-do-personal/{idPersonal}
    */
   const carregarResumo = async () => {
     try {
-      // 🔥 CORREÇÃO PRINCIPAL:
       const alunos = await personalService.listarAlunosDoPersonal(user.id);
-
       setTotalAlunos(alunos?.length || 0);
     } catch (error) {
       console.error("Erro ao carregar resumo do personal:", error);
     }
   };
 
+  // Carrega ao abrir a tela OU quando o personal adicionar um aluno
+  useEffect(() => {
+    if (user?.id) carregarResumo();
+  }, [user, personalReload]); // 🔥 recarrega automaticamente
+
   // ============================================
-  // MENUS DO PERSONAL — atualizado conforme pedido
+  // MENU DO PERSONAL
   // ============================================
   const menuItems = [
     {
@@ -48,8 +46,6 @@ const HomePersonal = () => {
       path: "/lembretes",
       color: "bg-blue-500",
     },
-
-    // 🔥 NOVO → vai para tela de adicionar aluno (lista todos)
     {
       title: "Adicionar Novo Aluno",
       icon: "👤",
@@ -57,8 +53,6 @@ const HomePersonal = () => {
       path: "/personal/adicionar-aluno",
       color: "bg-green-500",
     },
-
-    // 🧡 NOVO → ver apenas alunos vinculados ao personal
     {
       title: "Meus Alunos",
       icon: "📚",
@@ -66,7 +60,6 @@ const HomePersonal = () => {
       path: "/personal/alunos",
       color: "bg-yellow-500",
     },
-
     {
       title: "Criar Postagem",
       icon: "💬",

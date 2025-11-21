@@ -17,6 +17,14 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  // 🔥 NOVO: gatilho para atualizar dados do Personal em tempo real
+  const [reloadPersonalData, setReloadPersonalData] = useState(false);
+
+  // 🚀 Função que dispara atualização automática da Home do Personal
+  const triggerPersonalReload = () => {
+    setReloadPersonalData((prev) => !prev);
+  };
+
   // Carregar sessão salva
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
@@ -92,6 +100,10 @@ export const AuthProvider = ({ children }) => {
         isAluno,
         isPersonal,
         loading,
+
+        // 🔥 NOVOS (para atualizar Home do personal automaticamente)
+        reloadPersonalData,
+        triggerPersonalReload,
       }}
     >
       {children}
