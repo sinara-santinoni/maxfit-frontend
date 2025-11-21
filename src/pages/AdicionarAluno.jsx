@@ -2,16 +2,13 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Header from '../components/Header';
 import BottomNav from '../components/BottomNav';
-
-// 🔄 AGORA IMPORTA O SERVICE CORRETO:
 import { alunoPersonalService } from '../services/api';
-
 import { useAuth } from '../context/AuthContext';
 
 const AdicionarAluno = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
-  
+
   const [alunosDisponiveis, setAlunosDisponiveis] = useState([]);
   const [loading, setLoading] = useState(true);
   const [vinculando, setVinculando] = useState(null);
@@ -19,8 +16,7 @@ const AdicionarAluno = () => {
   const [busca, setBusca] = useState('');
 
   // ============================================
-  // BUSCAR TODOS OS ALUNOS DO SISTEMA
-  // (agora usando o service atualizado)
+  // CARREGAR ALUNOS DISPONÍVEIS
   // ============================================
   useEffect(() => {
     const carregar = async () => {
@@ -41,7 +37,6 @@ const AdicionarAluno = () => {
 
   // ============================================
   // VINCULAR ALUNO AO PERSONAL
-  // (agora usando o service correto)
   // ============================================
   const handleVincularAluno = async (alunoId) => {
     try {
@@ -50,11 +45,10 @@ const AdicionarAluno = () => {
 
       await alunoPersonalService.vincular(user.id, alunoId);
 
-      alert('✅ Aluno vinculado com sucesso!');
+      alert("🎉 Aluno vinculado com sucesso!");
 
-      // Remove da lista
-      setAlunosDisponiveis(prev => prev.filter(a => a.id !== alunoId));
-
+      // Remove aluno da lista
+      setAlunosDisponiveis((prev) => prev.filter((a) => a.id !== alunoId));
     } catch (error) {
       console.error('Erro ao vincular aluno:', error);
       setErro('Erro ao vincular aluno. Tente novamente.');
@@ -66,7 +60,7 @@ const AdicionarAluno = () => {
   // ============================================
   // FILTRO DE BUSCA
   // ============================================
-  const alunosFiltrados = alunosDisponiveis.filter(aluno =>
+  const alunosFiltrados = alunosDisponiveis.filter((aluno) =>
     aluno.nome.toLowerCase().includes(busca.toLowerCase()) ||
     aluno.email.toLowerCase().includes(busca.toLowerCase())
   );
@@ -76,7 +70,7 @@ const AdicionarAluno = () => {
       <Header title="Adicionar Aluno" />
 
       <main className="pt-20 px-4 max-w-md mx-auto">
-        {/* Botão Voltar */}
+        
         <button
           onClick={() => navigate('/home-personal')}
           className="mb-4 text-primary hover:text-orange-600 font-semibold flex items-center gap-2"
@@ -132,7 +126,6 @@ const AdicionarAluno = () => {
                 className="bg-white rounded-xl shadow-md p-4 hover:shadow-lg transition-shadow"
               >
                 <div className="flex items-center gap-4">
-
                   <div className="w-14 h-14 bg-gradient-to-br from-primary to-secondary rounded-full flex items-center justify-center text-white font-bold text-xl">
                     {aluno.nome.charAt(0).toUpperCase()}
                   </div>

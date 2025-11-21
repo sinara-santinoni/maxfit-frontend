@@ -244,21 +244,21 @@ export const progressoService = {
 };
 
 // ============================================
-//  PERSONAL SERVICE
+//  PERSONAL SERVICE (CORRETO PARA SEU BACKEND)
 // ============================================
 export const personalService = {
-  listarAlunosDoPersonal: async (personalId) => {
+  listarAlunos: async (idPersonal) => {
     try {
-      const response = await api.get(`/personal/${personalId}/alunos`);
+      const response = await api.get(`/alunos-do-personal/${idPersonal}`);
       return extractData(response);
     } catch (error) {
-      handleError(error, "personalService.listarAlunosDoPersonal");
+      handleError(error, "personalService.listarAlunos");
     }
   },
 
   listarAlunosDisponiveis: async () => {
     try {
-      const response = await api.get("/personal/alunos-disponiveis");
+      const response = await api.get("/alunos-disponiveis");
       return extractData(response);
     } catch (error) {
       handleError(error, "personalService.listarAlunosDisponiveis");
@@ -267,7 +267,7 @@ export const personalService = {
 
   vincularAluno: async (dados) => {
     try {
-      const response = await api.post("/personal/vincular-aluno", dados);
+      const response = await api.put("/vincular-aluno", dados);
       return extractData(response);
     } catch (error) {
       handleError(error, "personalService.vincularAluno");
@@ -460,20 +460,17 @@ export const comunidadeService = {
 };
 
 // ============================================
-//  SUPORTE SERVICE — CORRIGIDO E ROBUSTO
+//  SUPORTE SERVICE — COMPLETO
 // ============================================
 export const suporteService = {
-  // ========== PSICÓLOGOS ==========
   listarPsicologos: async () => {
     try {
       const user = getUser();
       const cidadeUsuario = user?.cidade?.toLowerCase().trim() || "";
 
-      // 📌 BUSCA SEM FILTRO NO BACKEND
       const response = await api.get("/suporte/psicologos");
       let lista = extractData(response) || [];
 
-      // 📌 FILTRO NO FRONTEND
       if (cidadeUsuario && lista.length > 0) {
         lista = lista.filter((prof) => {
           const cidadeProf = prof.cidade?.toLowerCase().trim() || "";
@@ -484,20 +481,18 @@ export const suporteService = {
         });
       }
 
-      // 📌 FALLBACK SE NÃO TIVER RESULTADOS
       if (lista.length === 0) {
         return fallbackPsicologos(cidadeUsuario);
       }
 
       return lista;
     } catch (error) {
-      console.warn("Erro ao buscar psicólogos, usando fallback:", error.message);
+      console.warn("Erro ao buscar psicólogos:", error.message);
       const user = getUser();
       return fallbackPsicologos(user?.cidade);
     }
   },
 
-  // ========== NUTRICIONISTAS ==========
   listarNutricionistas: async () => {
     try {
       const user = getUser();
@@ -522,34 +517,28 @@ export const suporteService = {
 
       return lista;
     } catch (error) {
-      console.warn("Erro ao buscar nutricionistas, usando fallback:", error.message);
+      console.warn("Erro ao buscar nutricionistas:", error.message);
       const user = getUser();
       return fallbackNutricionistas(user?.cidade);
     }
   },
 
-  // ========== TUTORIAIS ==========
   listarTutoriais: async () => {
     try {
       const response = await api.get("/suporte/tutoriais");
       const dados = extractData(response);
-
       return dados?.length ? dados : fallbackTutoriais();
     } catch (error) {
-      console.warn("Erro ao buscar tutoriais:", error.message);
       return fallbackTutoriais();
     }
   },
 
-  // ========== DICAS ==========
   listarDicas: async () => {
     try {
       const response = await api.get("/suporte/dicas");
       const dados = extractData(response);
-
       return dados?.length ? dados : fallbackDicas();
     } catch (error) {
-      console.warn("Erro ao buscar dicas:", error.message);
       return fallbackDicas();
     }
   },
@@ -558,16 +547,15 @@ export const suporteService = {
     try {
       const response = await api.get(`/suporte/dicas/${id}`);
       return extractData(response);
-    } catch (error) {
+    } catch {
       return null;
     }
   },
 };
 
 // ============================================
-//  FALLBACKS — CASO O BACKEND NÃO RESPONDA
+//  FALLBACKS
 // ============================================
-
 function fallbackPsicologos(cidade = "") {
   const base = [
     {
@@ -664,38 +652,33 @@ function fallbackDicas() {
     },
   ];
 }
+
 // ============================================
 //  GESTÃO DE ALUNOS — APENAS PARA O PERSONAL
-//  (NOVO - NÃO ALTERA NADA DO ALUNO)
 // ============================================
-
 export const alunoPersonalService = {
-  
-  // 1 — Lista TODOS os alunos cadastrados no MaxFit
   listarTodos: async () => {
     try {
-      const response = await api.get("/alunos");
+      const response = await api.get("/alunos-disponiveis");
       return extractData(response);
     } catch (error) {
       handleError(error, "alunoPersonalService.listarTodos");
     }
   },
 
-  // 2 — Lista os alunos que estão vinculados ao personal logado
   listarVinculados: async (personalId) => {
     try {
-      const response = await api.get(`/alunos/personal/${personalId}`);
+      const response = await api.get(`/alunos-do-personal/${personalId}`);
       return extractData(response);
     } catch (error) {
       handleError(error, "alunoPersonalService.listarVinculados");
     }
   },
 
-  // 3 — Vincular um aluno ao personal
   vincular: async (personalId, alunoId) => {
     try {
       const payload = { personalId, alunoId };
-      const response = await api.post("/usuario/vincular", payload);
+      const response = await api.put("/vincular-aluno", payload);
       return extractData(response);
     } catch (error) {
       handleError(error, "alunoPersonalService.vincular");

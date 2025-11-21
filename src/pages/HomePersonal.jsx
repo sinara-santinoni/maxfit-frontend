@@ -17,11 +17,13 @@ const HomePersonal = () => {
 
   /**
    * Carrega a quantidade de alunos vinculados ao personal
-   * GET /api/alunos/personal/{idPersonal}
+   * GET /api/alunos-do-personal/{idPersonal}
    */
   const carregarResumo = async () => {
     try {
-      const alunos = await personalService.listarAlunos(user.id);
+      // 🔥 CORREÇÃO PRINCIPAL:
+      const alunos = await personalService.listarAlunosDoPersonal(user.id);
+
       setTotalAlunos(alunos?.length || 0);
     } catch (error) {
       console.error("Erro ao carregar resumo do personal:", error);
@@ -29,7 +31,7 @@ const HomePersonal = () => {
   };
 
   // ============================================
-  // MENUS DO PERSONAL – atualizado conforme pedido
+  // MENUS DO PERSONAL — atualizado conforme pedido
   // ============================================
   const menuItems = [
     {
