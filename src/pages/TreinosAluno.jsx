@@ -3,33 +3,25 @@ import Header from '../components/Header';
 import BottomNav from '../components/BottomNav';
 import CardTreino from '../components/CardTreino';
 import { treinoService } from '../services/api';
-import { useAuth } from '../context/AuthContext';
 
 /**
  * Página de listagem de treinos do aluno
  * Mostra todos os treinos atribuídos pelo personal
  */
 const TreinosAluno = () => {
-  const { user } = useAuth();
   const [treinos, setTreinos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
-  // Buscar treinos ao carregar a página
   useEffect(() => {
-    if (user?.id) {
-      carregarTreinos();
-    }
-  }, [user]);
+    carregarTreinos();
+  }, []);
 
   const carregarTreinos = async () => {
     try {
       setLoading(true);
-
-      // 🔥 CHAMADA CORRETA
-      const data = await treinoService.listarTreinos(user.id);
-
-      setTreinos(data || []);
+      const data = await treinoService.listarTreinosAluno();
+      setTreinos(data);
     } catch (err) {
       console.error('Erro ao carregar treinos:', err);
       setError('Não foi possível carregar os treinos');
@@ -43,23 +35,7 @@ const TreinosAluno = () => {
       {/* Header */}
       <Header title="Meus Treinos" />
 
-      {/* Conteúdo principal */}
       <main className="pt-20 px-4 max-w-md mx-auto">
-        {/* Filtros rápidos */}
-        <div className="flex gap-2 mb-6 overflow-x-auto pb-2">
-          <button className="bg-primary text-white px-4 py-2 rounded-full text-sm font-semibold whitespace-nowrap">
-            Todos
-          </button>
-          <button className="bg-white text-gray-700 px-4 py-2 rounded-full text-sm font-semibold whitespace-nowrap border border-gray-300">
-            Segunda
-          </button>
-          <button className="bg-white text-gray-700 px-4 py-2 rounded-full text-sm font-semibold whitespace-nowrap border border-gray-300">
-            Terça
-          </button>
-          <button className="bg-white text-gray-700 px-4 py-2 rounded-full text-sm font-semibold whitespace-nowrap border border-gray-300">
-            Quarta
-          </button>
-        </div>
 
         {/* Loading */}
         {loading && (
@@ -75,7 +51,7 @@ const TreinosAluno = () => {
           </div>
         )}
 
-        {/* Lista de treinos */}
+        {/* Nenhum treino */}
         {!loading && !error && treinos.length === 0 && (
           <div className="text-center py-12">
             <p className="text-5xl mb-4">🏋️</p>
@@ -86,6 +62,7 @@ const TreinosAluno = () => {
           </div>
         )}
 
+        {/* Lista de treinos */}
         {!loading && !error && treinos.length > 0 && (
           <div className="space-y-4">
             {treinos.map((treino) => (
@@ -95,7 +72,6 @@ const TreinosAluno = () => {
         )}
       </main>
 
-      {/* Navegação inferior */}
       <BottomNav />
     </div>
   );
