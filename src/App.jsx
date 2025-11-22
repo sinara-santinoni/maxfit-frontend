@@ -9,6 +9,7 @@ import Cadastro from './pages/Cadastro';
 // Páginas do aluno
 import HomeAluno from './pages/HomeAluno';
 import TreinosAluno from './pages/TreinosAluno';
+import TreinoDetalhes from './pages/TreinoDetalhes'; // 🆕 Detalhes do treino
 import DiarioTreino from './pages/DiarioTreino';
 import Desafios from './pages/Desafios';
 import Comunidade from './pages/Comunidade';
@@ -21,16 +22,12 @@ import MeuProgresso from './pages/MeuProgresso';
 
 // Páginas do personal
 import HomePersonal from './pages/HomePersonal';
-
-// 🟧 IMPORTA AS NOVAS PÁGINAS DO PERSONAL
 import AdicionarAluno from './pages/AdicionarAluno';
 import MeusAlunos from './pages/MeusAlunos';
-
-// 🆕 IMPORTA A NOVA TELA DE TREINO (ADICIONADO AGORA)
-import CriarTreino from './pages/CriarTreino';
+import CriarTreino from './pages/CriarTreino'; // criação de treino
 
 /**
- * Redirecionamento inicial
+ * Redirecionamento inicial baseado no tipo do usuário
  */
 function RedirectHome() {
   const { user, isAuthenticated } = useAuth();
@@ -61,7 +58,7 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/cadastro" element={<Cadastro />} />
 
-          {/* Rotas protegidas do aluno */}
+          {/* Rotas do aluno */}
           <Route
             path="/home-aluno"
             element={
@@ -76,6 +73,16 @@ function App() {
             element={
               <PrivateRoute requiredType="ALUNO">
                 <TreinosAluno />
+              </PrivateRoute>
+            }
+          />
+
+          {/* 🆕 Detalhes do treino do aluno */}
+          <Route
+            path="/treinos/:id"
+            element={
+              <PrivateRoute requiredType="ALUNO">
+                <TreinoDetalhes />
               </PrivateRoute>
             }
           />
@@ -107,7 +114,7 @@ function App() {
             }
           />
 
-          {/* 👉 Suporte principal */}
+          {/* Suporte */}
           <Route
             path="/suporte"
             element={
@@ -117,7 +124,6 @@ function App() {
             }
           />
 
-          {/* 👉 Subpáginas do suporte */}
           <Route
             path="/suporte/psicologico"
             element={
@@ -154,7 +160,6 @@ function App() {
             }
           />
 
-          {/* Meu progresso */}
           <Route
             path="/progresso"
             element={
@@ -164,7 +169,7 @@ function App() {
             }
           />
 
-          {/* Personal */}
+          {/* Rotas do personal */}
           <Route
             path="/home-personal"
             element={
@@ -174,7 +179,6 @@ function App() {
             }
           />
 
-          {/* 🟧 NOVAS ROTAS DO PERSONAL */}
           <Route
             path="/personal/adicionar-aluno"
             element={
@@ -193,7 +197,7 @@ function App() {
             }
           />
 
-          {/* 🆕 ROTA NOVA → CRIAR TREINO */}
+          {/* Criar treino (personal) */}
           <Route
             path="/criar-treino"
             element={
@@ -205,7 +209,6 @@ function App() {
 
           {/* 404 */}
           <Route path="*" element={<Navigate to="/" replace />} />
-
         </Routes>
       </AuthProvider>
     </BrowserRouter>
