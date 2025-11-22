@@ -3,26 +3,33 @@ import Header from '../components/Header';
 import BottomNav from '../components/BottomNav';
 import CardTreino from '../components/CardTreino';
 import { treinoService } from '../services/api';
+import { useAuth } from '../context/AuthContext';
 
 /**
  * Página de listagem de treinos do aluno
  * Mostra todos os treinos atribuídos pelo personal
  */
 const TreinosAluno = () => {
+  const { user } = useAuth();
   const [treinos, setTreinos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
   // Buscar treinos ao carregar a página
   useEffect(() => {
-    carregarTreinos();
-  }, []);
+    if (user?.id) {
+      carregarTreinos();
+    }
+  }, [user]);
 
   const carregarTreinos = async () => {
     try {
       setLoading(true);
-      const data = await treinoService.listarTreinosAluno();
-      setTreinos(data);
+
+      // 🔥 CHAMADA CORRETA
+      const data = await treinoService.listarTreinos(user.id);
+
+      setTreinos(data || []);
     } catch (err) {
       console.error('Erro ao carregar treinos:', err);
       setError('Não foi possível carregar os treinos');
