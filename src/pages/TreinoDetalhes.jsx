@@ -6,7 +6,7 @@ import Header from "../components/Header";
 import BottomNav from "../components/BottomNav";
 
 const TreinoDetalhes = () => {
-  const { id } = useParams();
+  const { treinoId } = useParams(); // 🔥 AGORA PEGA O PARAM CORRETO
   const navigate = useNavigate();
 
   const [treino, setTreino] = useState(null);
@@ -20,11 +20,14 @@ const TreinoDetalhes = () => {
   const carregarTreino = async () => {
     try {
       setLoading(true);
-      const data = await treinoService.buscarTreinoPorId(id);
+
+      // 🔥 AQUI ESTAVA ERRADO — AGORA USA A FUNÇÃO QUE CRIAMOS
+      const data = await treinoService.buscarPorId(treinoId);
+
       setTreino(data);
     } catch (err) {
+      console.error(err);
       setErro("Erro ao carregar detalhes do treino");
-      console.log(err);
     } finally {
       setLoading(false);
     }
@@ -52,11 +55,13 @@ const TreinoDetalhes = () => {
 
       <main className="pt-20 px-4 max-w-md mx-auto">
 
-        <button onClick={() => navigate(-1)} className="text-primary font-semibold mb-4">
+        <button
+          onClick={() => navigate(-1)}
+          className="text-primary font-semibold mb-4"
+        >
           ← Voltar
         </button>
 
-        {/* CARD */}
         <div className="bg-white p-5 rounded-xl shadow space-y-4">
 
           <h2 className="text-xl font-bold text-dark">{treino.titulo}</h2>
@@ -82,26 +87,22 @@ const TreinoDetalhes = () => {
 
           <hr />
 
-          {/* Exercícios */}
           <h3 className="text-lg font-bold">Exercícios</h3>
 
           <div className="space-y-3">
-            {treino.exercicios.map((ex, index) => (
+            {treino.exercicios?.map((ex, index) => (
               <div key={index} className="bg-gray-50 p-3 rounded-lg">
+
                 <h4 className="font-semibold">{ex.nome}</h4>
 
                 <p className="text-sm text-gray-700">
-                  Séries: {ex.series || "-"}
-                  <br />
-                  Repetições: {ex.repeticoes || "-"}
-                  <br />
+                  Séries: {ex.series || "-"} <br />
+                  Repetições: {ex.repeticoes || "-"} <br />
                   Descanso: {ex.descanso ? `${ex.descanso}s` : "-"}
                 </p>
 
                 {ex.observacoes && (
-                  <p className="mt-1 text-sm text-gray-600 italic">
-                    {ex.observacoes}
-                  </p>
+                  <p className="mt-1 text-sm text-gray-600 italic">{ex.observacoes}</p>
                 )}
               </div>
             ))}
