@@ -155,6 +155,96 @@ export const treinoService = {
     }
   },
 
+  // ✅ CORRIGIDO: Busca treino por ID com fallback
+  buscarPorId: async (treinoId) => {
+    try {
+      // Tenta buscar direto pelo endpoint de detalhes
+      const response = await api.get(`/treinos/detalhes/${treinoId}`);
+      return extractData(response);
+    } catch (error) {
+      // Se falhar, busca da lista do aluno e filtra
+      console.warn("Endpoint /detalhes não existe, buscando da lista do aluno...");
+      
+      try {
+        const user = getUser();
+        if (!user?.id) {
+          throw new Error("Usuário não autenticado");
+        }
+
+        // Busca todos os treinos do aluno
+        const response = await api.get(`/treinos/${user.id}`);
+        const treinos = extractData(response);
+        
+        // Filtra o treino específico
+        const treino = treinos?.find(t => t.id === parseInt(treinoId));
+        
+        if (!treino) {
+          throw new Error("Treino não encontrado");
+        }
+        
+        return treino;
+      } catch (fallbackError) {
+        console.error("Erro no fallback:", fallbackError);
+        handleError(fallbackError, "treinoService.buscarPorId");
+      }
+    }
+  },
+
+  criarTreino: async (dados) => {
+    try {
+      const response = await api.post("/treinos", dados);
+      return extractData(response);
+    } catch (error) {
+      handleError(error, "treinoService.criarTreino");
+    }
+  },
+
+  atualizarTreino: async (id, dados) => {
+    try {
+      const response = await api.put(`/treinos/${id}`, dados);
+      return extractData(response);
+    } catch (error) {
+      handleError(error, "treinoService.atualizarTreino");
+    }
+  },
+
+  deletarTreino: async (id) => {
+    try {
+      const response = await api.delete(`/treinos/${id}`);
+      return extractData(response);
+    } catch (error) {
+      handleError(error, "treinoService.deletarTreino");
+    }
+  },
+
+  registrarTreino: async (dados) => {
+    try {
+      if (!dados) {
+        const user = getUser();
+        dados = {
+          alunoId: user.id,
+          nomeTreino: "Treino do dia",
+          concluido: true,
+        };
+      }
+      const response = await api.post("/treinos/registro", dados);
+      return extractData(response);
+    } catch (error) {
+      handleError(error, "treinoService.registrarTreino");
+    }
+  },
+
+  dashboard: async (alunoId) => {
+    try {
+      if (!alunoId) alunoId = getUser()?.id;
+      const response = await api.get(`/treinos/dashboard/${alunoId}`);
+      return extractData(response);
+    } catch (error) {
+      handleError(error, "treinoService.dashboard");
+    }
+  },
+};
+
   // 🆕 ADICIONE ESTA FUNÇÃO AQUI
   buscarPorId: async (treinoId) => {
     try {
