@@ -1,16 +1,16 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { treinoService } from "../services/api";
+import { treinoService, usuarioService } from "../services/api";
 
 import Header from "../components/Header";
 import BottomNav from "../components/BottomNav";
 
 const TreinoDetalhes = () => {
-  // ✅ CORRIGIDO: extrai 'id' do useParams e renomeia para treinoId
   const { id: treinoId } = useParams();
   const navigate = useNavigate();
 
   const [treino, setTreino] = useState(null);
+  const [personalNome, setPersonalNome] = useState("Personal Trainer"); // 🆕
   const [loading, setLoading] = useState(true);
   const [erro, setErro] = useState("");
 
@@ -28,13 +28,32 @@ const TreinoDetalhes = () => {
 
       // Busca o treino pelo ID
       const data = await treinoService.buscarPorId(treinoId);
-
       setTreino(data);
+
+      // 🆕 Busca o nome do Personal se houver personalId
+      if (data?.personalId) {
+        buscarNomePersonal(data.personalId);
+      }
     } catch (err) {
       console.error("Erro ao carregar treino:", err);
       setErro("Erro ao carregar detalhes do treino");
     } finally {
       setLoading(false);
+    }
+  };
+
+  // 🆕 Função para buscar nome do Personal
+  const buscarNomePersonal = async (personalId) => {
+    try {
+      const usuarios = await usuarioService.listarUsuarios();
+      const personal = usuarios?.find(u => u.id === personalId);
+      
+      if (personal?.nome) {
+        setPersonalNome(personal.nome);
+      }
+    } catch (error) {
+      console.warn("Não foi possível buscar o nome do personal:", error);
+      // Mantém o valor padrão "Personal Trainer"
     }
   };
 
@@ -123,9 +142,15 @@ const TreinoDetalhes = () => {
             )}
           </div>
 
-          <p className="text-sm text-gray-500 italic">
-            👨‍🏫 Criado por: Personal Trainer
-          </p>
+          {/* 🆕 Nome do Personal com ícone */}
+          <div className="bg-gradient-to-r from-orange-50 to-yellow-50 p-4 rounded-lg border border-orange-200">
+            <p className="text-sm flex items-center gap-2">
+              <span className="text-2xl">👨‍🏫</span>
+              <span className="text-gray-700">
+                Criado por: <span className="font-bold text-dark">{personalNome}</span>
+              </span>
+            </p>
+          </div>
 
           {/* Lista de Exercícios */}
           <div className="border-t border-gray-200 pt-4">
