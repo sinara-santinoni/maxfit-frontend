@@ -155,7 +155,6 @@ export const treinoService = {
     }
   },
 
-  // ✅ CORRIGIDO: Busca treino por ID com fallback
   buscarPorId: async (treinoId) => {
     try {
       // Tenta buscar direto pelo endpoint de detalhes
@@ -187,72 +186,6 @@ export const treinoService = {
         console.error("Erro no fallback:", fallbackError);
         handleError(fallbackError, "treinoService.buscarPorId");
       }
-    }
-  },
-
-  criarTreino: async (dados) => {
-    try {
-      const response = await api.post("/treinos", dados);
-      return extractData(response);
-    } catch (error) {
-      handleError(error, "treinoService.criarTreino");
-    }
-  },
-
-  atualizarTreino: async (id, dados) => {
-    try {
-      const response = await api.put(`/treinos/${id}`, dados);
-      return extractData(response);
-    } catch (error) {
-      handleError(error, "treinoService.atualizarTreino");
-    }
-  },
-
-  deletarTreino: async (id) => {
-    try {
-      const response = await api.delete(`/treinos/${id}`);
-      return extractData(response);
-    } catch (error) {
-      handleError(error, "treinoService.deletarTreino");
-    }
-  },
-
-  registrarTreino: async (dados) => {
-    try {
-      if (!dados) {
-        const user = getUser();
-        dados = {
-          alunoId: user.id,
-          nomeTreino: "Treino do dia",
-          concluido: true,
-        };
-      }
-      const response = await api.post("/treinos/registro", dados);
-      return extractData(response);
-    } catch (error) {
-      handleError(error, "treinoService.registrarTreino");
-    }
-  },
-
-  dashboard: async (alunoId) => {
-    try {
-      if (!alunoId) alunoId = getUser()?.id;
-      const response = await api.get(`/treinos/dashboard/${alunoId}`);
-      return extractData(response);
-    } catch (error) {
-      handleError(error, "treinoService.dashboard");
-    }
-  },
-};
-
-  // 🆕 ADICIONE ESTA FUNÇÃO AQUI
-  buscarPorId: async (treinoId) => {
-    try {
-      const response = await api.get(`/treinos/detalhes/${treinoId}`);
-      return extractData(response);
-    } catch (error) {
-      console.error("Erro ao buscar treino por ID:", error);
-      handleError(error, "treinoService.buscarPorId");
     }
   },
 
