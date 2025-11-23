@@ -6,7 +6,8 @@ import Header from "../components/Header";
 import BottomNav from "../components/BottomNav";
 
 const TreinoDetalhes = () => {
-  const { treinoId } = useParams(); // 🔥 AGORA PEGA O PARAM CORRETO
+  // ✅ CORRIGIDO: extrai 'id' do useParams e renomeia para treinoId
+  const { id: treinoId } = useParams();
   const navigate = useNavigate();
 
   const [treino, setTreino] = useState(null);
@@ -14,25 +15,30 @@ const TreinoDetalhes = () => {
   const [erro, setErro] = useState("");
 
   useEffect(() => {
-    carregarTreino();
-  }, []);
+    if (treinoId) {
+      carregarTreino();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [treinoId]);
 
   const carregarTreino = async () => {
     try {
       setLoading(true);
+      setErro("");
 
-      // 🔥 AQUI ESTAVA ERRADO — AGORA USA A FUNÇÃO QUE CRIAMOS
+      // Busca o treino pelo ID
       const data = await treinoService.buscarPorId(treinoId);
 
       setTreino(data);
     } catch (err) {
-      console.error(err);
+      console.error("Erro ao carregar treino:", err);
       setErro("Erro ao carregar detalhes do treino");
     } finally {
       setLoading(false);
     }
   };
 
+  // Loading
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -41,10 +47,32 @@ const TreinoDetalhes = () => {
     );
   }
 
+  // Erro ou treino não encontrado
   if (!treino) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <p className="text-gray-600">{erro || "Treino não encontrado"}</p>
+      <div className="min-h-screen bg-gray-50 pb-24">
+        <Header title="Detalhes do Treino" />
+        <main className="pt-20 px-4 max-w-md mx-auto">
+          <button
+            onClick={() => navigate(-1)}
+            className="text-primary font-semibold mb-4"
+          >
+            ← Voltar
+          </button>
+          <div className="bg-white p-8 rounded-xl shadow text-center">
+            <p className="text-5xl mb-4">❌</p>
+            <p className="text-gray-600 font-semibold mb-2">
+              {erro || "Treino não encontrado"}
+            </p>
+            <button
+              onClick={() => navigate("/treinos")}
+              className="mt-4 bg-primary text-white px-6 py-2 rounded-lg font-semibold hover:bg-orange-600"
+            >
+              Ver meus treinos
+            </button>
+          </div>
+        </main>
+        <BottomNav />
       </div>
     );
   }
@@ -54,61 +82,119 @@ const TreinoDetalhes = () => {
       <Header title="Detalhes do Treino" />
 
       <main className="pt-20 px-4 max-w-md mx-auto">
-
         <button
           onClick={() => navigate(-1)}
-          className="text-primary font-semibold mb-4"
+          className="text-primary font-semibold mb-4 flex items-center gap-2 hover:text-orange-600"
         >
           ← Voltar
         </button>
 
         <div className="bg-white p-5 rounded-xl shadow space-y-4">
+          {/* Cabeçalho do Treino */}
+          <div className="border-b border-gray-200 pb-4">
+            <h2 className="text-xl font-bold text-dark mb-2">
+              {treino.titulo}
+            </h2>
 
-          <h2 className="text-xl font-bold text-dark">{treino.titulo}</h2>
+            {treino.objetivo && (
+              <p className="text-sm text-gray-700">
+                <span className="font-semibold">🎯 Objetivo:</span>{" "}
+                {treino.objetivo}
+              </p>
+            )}
+          </div>
 
-          {treino.objetivo && (
-            <p><span className="font-semibold">Objetivo:</span> {treino.objetivo}</p>
-          )}
+          {/* Informações do Treino */}
+          <div className="grid grid-cols-2 gap-4">
+            <div className="bg-gray-50 p-3 rounded-lg">
+              <p className="text-xs text-gray-600 mb-1">Nível</p>
+              <p className="font-semibold text-dark">
+                {treino.nivel || "Não informado"}
+              </p>
+            </div>
 
-          <p>
-            <span className="font-semibold">Nível:</span> {treino.nivel || "Não informado"}
-          </p>
-
-          {treino.validade && (
-            <p>
-              <span className="font-semibold">Validade:</span>{" "}
-              {treino.validade}
-            </p>
-          )}
-
-          <p className="text-sm text-gray-500">
-            Criado por: Personal Trainer
-          </p>
-
-          <hr />
-
-          <h3 className="text-lg font-bold">Exercícios</h3>
-
-          <div className="space-y-3">
-            {treino.exercicios?.map((ex, index) => (
-              <div key={index} className="bg-gray-50 p-3 rounded-lg">
-
-                <h4 className="font-semibold">{ex.nome}</h4>
-
-                <p className="text-sm text-gray-700">
-                  Séries: {ex.series || "-"} <br />
-                  Repetições: {ex.repeticoes || "-"} <br />
-                  Descanso: {ex.descanso ? `${ex.descanso}s` : "-"}
+            {treino.validade && (
+              <div className="bg-gray-50 p-3 rounded-lg">
+                <p className="text-xs text-gray-600 mb-1">Validade</p>
+                <p className="font-semibold text-dark">
+                  {new Date(treino.validade).toLocaleDateString("pt-BR")}
                 </p>
-
-                {ex.observacoes && (
-                  <p className="mt-1 text-sm text-gray-600 italic">{ex.observacoes}</p>
-                )}
               </div>
-            ))}
+            )}
+          </div>
+
+          <p className="text-sm text-gray-500 italic">
+            👨‍🏫 Criado por: Personal Trainer
+          </p>
+
+          {/* Lista de Exercícios */}
+          <div className="border-t border-gray-200 pt-4">
+            <h3 className="text-lg font-bold text-dark mb-4 flex items-center gap-2">
+              💪 Exercícios
+              <span className="text-sm font-normal text-gray-600">
+                ({treino.exercicios?.length || 0})
+              </span>
+            </h3>
+
+            {(!treino.exercicios || treino.exercicios.length === 0) && (
+              <div className="text-center py-8 bg-gray-50 rounded-lg">
+                <p className="text-gray-600">Nenhum exercício cadastrado</p>
+              </div>
+            )}
+
+            <div className="space-y-3">
+              {treino.exercicios?.map((ex, index) => (
+                <div
+                  key={index}
+                  className="bg-gradient-to-r from-orange-50 to-yellow-50 p-4 rounded-lg border border-orange-100"
+                >
+                  <div className="flex items-start justify-between mb-2">
+                    <h4 className="font-bold text-dark flex-1">{ex.nome}</h4>
+                    <span className="bg-primary text-white text-xs px-2 py-1 rounded-full">
+                      #{index + 1}
+                    </span>
+                  </div>
+
+                  <div className="grid grid-cols-3 gap-2 text-sm text-gray-700 mb-2">
+                    <div>
+                      <p className="text-xs text-gray-600">Séries</p>
+                      <p className="font-semibold">{ex.series || "-"}</p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-gray-600">Repetições</p>
+                      <p className="font-semibold">{ex.repeticoes || "-"}</p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-gray-600">Descanso</p>
+                      <p className="font-semibold">
+                        {ex.descanso ? `${ex.descanso}s` : "-"}
+                      </p>
+                    </div>
+                  </div>
+
+                  {ex.observacoes && (
+                    <div className="mt-3 pt-3 border-t border-orange-200">
+                      <p className="text-xs text-gray-600 mb-1">📝 Observações:</p>
+                      <p className="text-sm text-gray-700 italic">
+                        {ex.observacoes}
+                      </p>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Botão de ação */}
+          <div className="pt-4 border-t border-gray-200">
+            <button
+              onClick={() => navigate("/treinos")}
+              className="w-full bg-primary text-white py-3 rounded-lg font-semibold hover:bg-orange-600 transition-colors"
+            >
+              Ver todos os treinos
+            </button>
           </div>
         </div>
-
       </main>
 
       <BottomNav />
