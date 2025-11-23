@@ -155,6 +155,17 @@ export const treinoService = {
     }
   },
 
+  // 🆕 ADICIONE ESTA FUNÇÃO AQUI
+  buscarPorId: async (treinoId) => {
+    try {
+      const response = await api.get(`/treinos/detalhes/${treinoId}`);
+      return extractData(response);
+    } catch (error) {
+      console.error("Erro ao buscar treino por ID:", error);
+      handleError(error, "treinoService.buscarPorId");
+    }
+  },
+
   criarTreino: async (dados) => {
     try {
       const response = await api.post("/treinos", dados);
@@ -209,7 +220,6 @@ export const treinoService = {
     }
   },
 };
-
 // ============================================
 //  PROGRESSO SERVICE
 // ============================================
