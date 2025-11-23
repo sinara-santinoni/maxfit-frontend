@@ -10,14 +10,12 @@ const Desafios = () => {
   const [loading, setLoading] = useState(true);
   const [abaSelecionada, setAbaSelecionada] = useState('todos');
   
-  // 🆕 Modal de participantes
   const [modalParticipantes, setModalParticipantes] = useState(false);
   const [participantes, setParticipantes] = useState([]);
   const [desafioSelecionado, setDesafioSelecionado] = useState(null);
 
   const user = JSON.parse(localStorage.getItem('user'));
 
-  // Formulário
   const [mostrarFormulario, setMostrarFormulario] = useState(false);
   const [formData, setFormData] = useState({
     titulo: '',
@@ -48,7 +46,6 @@ const Desafios = () => {
     }
   };
 
-  // 🆕 VER PARTICIPANTES
   const handleVerParticipantes = async (desafioId) => {
     try {
       setLoading(true);
@@ -67,7 +64,6 @@ const Desafios = () => {
     }
   };
 
-  // PARTICIPAR
   const handleParticipar = async (desafioId) => {
     try {
       await desafioService.participar(desafioId);
@@ -79,7 +75,6 @@ const Desafios = () => {
     }
   };
 
-  // 🆕 SAIR DO DESAFIO
   const handleSair = async (desafioId) => {
     if (!window.confirm('Tem certeza que deseja sair deste desafio?')) return;
 
@@ -93,7 +88,6 @@ const Desafios = () => {
     }
   };
 
-  // CRIAR
   const handleCriarDesafio = async (e) => {
     e.preventDefault();
     try {
@@ -116,38 +110,48 @@ const Desafios = () => {
     }
   };
 
-  // EXCLUIR
+  // 🔥 CORRIGIDO - EXCLUIR
   const handleExcluir = async (desafioId) => {
-    if (!window.confirm('Tem certeza que deseja excluir este desafio?')) return;
+    if (!window.confirm('❌ Tem certeza que deseja EXCLUIR este desafio?\n\nEsta ação não pode ser desfeita!')) return;
 
     try {
-      await desafioService.excluirDesafio(desafioId);
-      alert('Desafio excluído com sucesso!');
+      console.log('🗑️ Excluindo desafio:', desafioId);
+      
+      // 👇 CORRETO - usa o método certo do api.js
+      await desafioService.excluir(desafioId);
+      
+      alert('✅ Desafio excluído com sucesso!');
       await carregarDesafios();
     } catch (error) {
-      console.error('Erro ao excluir desafio:', error);
-      alert('Erro ao excluir desafio');
+      console.error('💥 Erro ao excluir desafio:', error);
+      console.error('💥 Detalhes:', error.response?.data);
+      alert(error.response?.data?.mensagem || 'Erro ao excluir desafio');
     }
   };
 
-  // CONCLUIR
+  // 🔥 CORRIGIDO - CONCLUIR
   const handleConcluir = async (desafioId) => {
+    if (!window.confirm('✅ Marcar este desafio como CONCLUÍDO?')) return;
+
     try {
-      await desafioService.concluirDesafio(desafioId);
-      alert('Desafio concluído com sucesso! 🔥');
+      console.log('✅ Concluindo desafio:', desafioId);
+      
+      // 👇 CORRETO - usa o método certo do api.js
+      await desafioService.concluir(desafioId);
+      
+      alert('🎉 Desafio concluído com sucesso!');
       await carregarDesafios();
     } catch (error) {
-      console.error('Erro ao concluir desafio:', error);
-      alert('Erro ao concluir desafio');
+      console.error('💥 Erro ao concluir desafio:', error);
+      console.error('💥 Detalhes:', error.response?.data);
+      alert(error.response?.data?.mensagem || 'Erro ao concluir desafio');
     }
   };
 
-  // VERIFICA PARTICIPAÇÃO
   const estaParticipando = (desafioId) => {
     return meusDesafios.some((d) => d.id === desafioId);
   };
 
-  // FILTRO DAS ABAS
   let desafiosExibidos = [];
 
   if (abaSelecionada === 'todos') {
@@ -166,7 +170,6 @@ const Desafios = () => {
 
       <main className="pt-20 px-4 max-w-md mx-auto">
 
-        {/* Criar Desafio */}
         <button
           onClick={() => setMostrarFormulario((prev) => !prev)}
           className="btn-primary mb-4 w-full"
@@ -174,7 +177,6 @@ const Desafios = () => {
           {mostrarFormulario ? '✕ Cancelar' : '+ Criar Desafio'}
         </button>
 
-        {/* FORMULÁRIO */}
         {mostrarFormulario && (
           <div className="card mb-6">
             <h3 className="text-lg font-bold text-dark mb-4">
@@ -272,7 +274,6 @@ const Desafios = () => {
           </div>
         )}
 
-        {/* Abas */}
         <div className="flex gap-2 mb-6">
           <button
             onClick={() => setAbaSelecionada('todos')}
@@ -308,7 +309,6 @@ const Desafios = () => {
           </button>
         </div>
 
-        {/* Lista */}
         {!loading && (
           <div className="space-y-4">
             {desafiosExibidos.map((desafio) => (
@@ -326,7 +326,6 @@ const Desafios = () => {
           </div>
         )}
 
-        {/* 🆕 MODAL DE PARTICIPANTES */}
         {modalParticipantes && (
           <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
             <div className="bg-white rounded-2xl max-w-md w-full max-h-[80vh] overflow-y-auto">
